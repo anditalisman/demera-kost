@@ -47,6 +47,9 @@ class ApplicationSettingController extends Controller
             'invoice_late_fee_type' => ['label' => 'Tipe Denda Keterlambatan (flat/percentage)', 'type' => 'string'],
             'invoice_late_fee_amount' => ['label' => 'Nilai Denda Keterlambatan', 'type' => 'number'],
         ],
+        'notification' => [
+            'invoice_reminder_offsets' => ['label' => 'Jadwal Pengingat Tagihan (hari, pisahkan koma, mis. -7,-3,-1,0,1,3,7)', 'type' => 'string'],
+        ],
     ];
 
     public function __construct(private readonly ImageUploadService $imageUploadService) {}

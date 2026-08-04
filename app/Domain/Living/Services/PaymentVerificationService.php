@@ -4,6 +4,7 @@ namespace App\Domain\Living\Services;
 
 use App\Domain\Living\Models\Invoice;
 use App\Domain\Living\Models\Payment;
+use App\Domain\Platform\Services\NotificationDispatcher;
 use App\Domain\Platform\Services\PrivateDocumentUploadService;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
@@ -24,6 +25,7 @@ class PaymentVerificationService
     public function __construct(
         private readonly PrivateDocumentUploadService $documentUploadService,
         private readonly BookingLifecycleService $bookingLifecycleService,
+        private readonly NotificationDispatcher $notificationDispatcher,
     ) {}
 
     public function submitProof(Invoice $invoice, PaymentMethod $method, UploadedFile $proof): Payment
@@ -67,6 +69,15 @@ class PaymentVerificationService
 
             if ($isFullyPaid && $invoice->booking_id) {
                 $this->bookingLifecycleService->confirm($invoice->booking, $admin);
+            }
+
+            $user = $invoice->booking?->user ?? $invoice->tenant?->user;
+
+            if ($user) {
+                $this->notificationDispatcher->dispatch($user, 'payment_verified', [
+                    'payment_code' => $lockedPayment->payment_code,
+                    'amount' => number_format((float) $lockedPayment->amount, 0, ',', '.'),
+                ]);
             }
 
             return $invoice->fresh(['items', 'payments']);

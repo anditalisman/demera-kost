@@ -10,6 +10,7 @@ use App\Domain\Living\Models\Lease;
 use App\Domain\Living\Models\Room;
 use App\Domain\Living\Models\Tenant;
 use App\Domain\Platform\Models\ApplicationSetting;
+use App\Domain\Platform\Services\NotificationDispatcher;
 use App\Domain\Platform\Services\PrivateDocumentUploadService;
 use App\Enums\BookingStatus;
 use App\Enums\DepositStatus;
@@ -31,6 +32,7 @@ class BookingLifecycleService
 {
     public function __construct(
         private readonly PrivateDocumentUploadService $documentUploadService,
+        private readonly NotificationDispatcher $notificationDispatcher,
     ) {}
 
     /**
@@ -210,6 +212,17 @@ class BookingLifecycleService
             }
 
             $locked->update(['status' => BookingStatus::ConvertedToLease]);
+
+            $this->notificationDispatcher->dispatch($locked->user, 'booking_confirmed', [
+                'name' => $locked->user->name,
+                'room_name' => $room?->name ?? "Kamar {$room?->room_number}",
+                'booking_code' => $locked->booking_code,
+            ]);
+            $this->notificationDispatcher->dispatch($locked->user, 'booking_confirmed_wa', [
+                'name' => $locked->user->name,
+                'room_name' => $room?->name ?? "Kamar {$room?->room_number}",
+                'booking_code' => $locked->booking_code,
+            ]);
 
             return $lease;
         });

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -118,6 +119,7 @@ const navItems = computed(() => {
                 <div class="flex-1" />
 
                 <div class="flex items-center gap-4">
+                    <NotificationBell />
                     <span class="hidden text-sm text-charcoal-500 sm:inline">
                         {{ page.props.auth.user?.name }}
                     </span>

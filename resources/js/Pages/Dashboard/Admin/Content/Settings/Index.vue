@@ -26,6 +26,7 @@ const GROUP_LABELS: Record<string, string> = {
     seo: 'SEO',
     booking: 'Pemesanan',
     payment: 'Pembayaran',
+    notification: 'Notifikasi',
 };
 
 const initialValues: Record<string, string> = {};

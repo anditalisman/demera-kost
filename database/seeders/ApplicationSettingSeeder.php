@@ -21,6 +21,7 @@ class ApplicationSettingSeeder extends Seeder
             'seo_default_title' => ['value' => 'Demera — Fashion & Living', 'group' => 'seo', 'label' => 'Meta Title Default'],
             'seo_default_description' => ['value' => 'Demera menghadirkan kost nyaman dan terpercaya melalui Demera Living, serta fashion editorial melalui Demera Fashion.', 'group' => 'seo', 'label' => 'Meta Description Default'],
             'booking_hold_hours' => ['value' => '24', 'group' => 'booking', 'label' => 'Batas Waktu Pembayaran Booking (jam)', 'type' => 'number', 'is_public' => false],
+            'invoice_reminder_offsets' => ['value' => '-7,-3,-1,0,1,3,7', 'group' => 'notification', 'label' => 'Jadwal Pengingat Tagihan (hari, koma pisah)', 'is_public' => false],
         ];
 
         foreach ($settings as $key => $attrs) {

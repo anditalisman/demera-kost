@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import { PageProps } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 
@@ -46,6 +47,7 @@ const page = usePage<PageProps>();
                     <Link :href="route('logout')" method="post" as="button" class="text-sm font-medium text-charcoal-500 hover:text-terracotta-600">
                         Keluar
                     </Link>
+                    <NotificationBell />
                 </nav>
             </div>
         </header>
