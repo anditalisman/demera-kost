@@ -13,7 +13,7 @@ defineProps<{
 }>();
 
 const form = useForm({
-    email: '',
+    login: '',
     password: '',
     remember: false,
 });
@@ -29,31 +29,42 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head title="Masuk" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <h1 class="font-display text-xl font-semibold text-charcoal-800">
+            Selamat datang kembali
+        </h1>
+        <p class="mt-1 text-sm text-charcoal-400">
+            Masuk untuk memesan kamar dan mengelola sewa Anda.
+        </p>
+
+        <div
+            v-if="status"
+            class="mt-4 rounded-lg bg-terracotta-50 px-4 py-3 text-sm font-medium text-terracotta-600"
+        >
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
+        <form class="mt-6" @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="login" value="Email atau Nomor WhatsApp" />
 
                 <TextInput
-                    id="email"
-                    type="email"
+                    id="login"
+                    type="text"
                     class="mt-1 block w-full"
-                    v-model="form.email"
+                    v-model="form.login"
                     required
                     autofocus
                     autocomplete="username"
+                    placeholder="nama@email.com atau 08xxxxxxxxxx"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="form.errors.login" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Kata Sandi" />
 
                 <TextInput
                     id="password"
@@ -70,29 +81,34 @@ const submit = () => {
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
+                    <span class="ms-2 text-sm text-charcoal-500">Ingat saya</span>
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-6 flex items-center justify-between">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="rounded-md text-sm text-charcoal-500 underline hover:text-terracotta-600 focus:outline-none focus:ring-2 focus:ring-terracotta-400"
                 >
-                    Forgot your password?
+                    Lupa kata sandi?
                 </Link>
 
                 <PrimaryButton
-                    class="ms-4"
+                    class="ms-auto"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Log in
+                    Masuk
                 </PrimaryButton>
             </div>
         </form>
+
+        <p class="mt-6 text-center text-sm text-charcoal-400">
+            Belum punya akun?
+            <Link :href="route('register')" class="font-semibold text-terracotta-600 underline">
+                Daftar sekarang
+            </Link>
+        </p>
     </GuestLayout>
 </template>

@@ -26,6 +26,13 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'whatsapp_number' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^\+?[0-9]{9,20}$/',
+                Rule::unique(User::class)->ignore($this->user()->id),
+            ],
         ];
     }
 }

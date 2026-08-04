@@ -14,7 +14,6 @@ services:
       - .:/var/www/html
     environment:
       - PHP_IDE_CONFIG=serverName=demera
-    env_file: .env
     depends_on:
       mysql:
         condition: service_healthy
@@ -112,7 +111,6 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-    env_file: .env
     depends_on:
       mysql:
         condition: service_healthy
@@ -132,7 +130,6 @@ services:
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
-    env_file: .env
     depends_on:
       mysql:
         condition: service_healthy
