@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\PolicyPageController;
+use App\Http\Controllers\Public\SeoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingController::class, 'show'])->name('landing');
 
 Route::get('/kebijakan/{slug}', [PolicyPageController::class, 'show'])->name('policies.show');
+
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
