@@ -4,12 +4,18 @@ namespace App\Domain\Living\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['lease_id', 'previous_end_date', 'new_end_date', 'duration_months', 'price_at_extension', 'status', 'notes'])]
+#[Fillable([
+    'lease_id', 'previous_end_date', 'new_end_date', 'duration_months', 'price_at_extension',
+    'status', 'requested_by', 'approved_by', 'approved_at', 'notes',
+])]
 class LeaseExtension extends Model
 {
+    use HasFactory;
+
     protected function casts(): array
     {
         return [

@@ -32,6 +32,22 @@ const navItems = computed(() => {
         );
     }
 
+    if (route().has('admin.bookings.index') && (can('bookings.view') || can('bookings.manage'))) {
+        items.push({ label: 'Booking', href: route('admin.bookings.index'), active: route().current('admin.bookings.*') });
+    }
+
+    if (route().has('admin.tenants.index') && (can('tenants.view') || can('tenants.manage'))) {
+        items.push({ label: 'Penyewa', href: route('admin.tenants.index'), active: route().current('admin.tenants.*') });
+    }
+
+    if (route().has('admin.leases.index') && (can('leases.view') || can('leases.manage'))) {
+        items.push({ label: 'Kontrak Sewa', href: route('admin.leases.index'), active: route().current('admin.leases.*') });
+    }
+
+    if (route().has('admin.maintenance-requests.index') && (can('maintenance.view') || can('maintenance.manage'))) {
+        items.push({ label: 'Keluhan', href: route('admin.maintenance-requests.index'), active: route().current('admin.maintenance-requests.*') });
+    }
+
     if (route().has('admin.invoices.index') && (can('invoices.view') || can('invoices.manage'))) {
         items.push({ label: 'Invoice', href: route('admin.invoices.index'), active: route().current('admin.invoices.*') });
     }

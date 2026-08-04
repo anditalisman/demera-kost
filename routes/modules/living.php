@@ -3,6 +3,7 @@
 use App\Http\Controllers\Living\BookingController;
 use App\Http\Controllers\Living\InvoiceController;
 use App\Http\Controllers\Living\LivingController;
+use App\Http\Controllers\Living\MaintenanceController;
 use App\Http\Controllers\Living\PaymentController;
 use App\Http\Controllers\Living\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -37,4 +38,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/invoices/{invoice}/pay', [PaymentController::class, 'create'])->name('payments.create');
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
+
+    Route::get('/maintenance-requests', [MaintenanceController::class, 'index'])->name('maintenance-requests.index');
+    Route::get('/maintenance-requests/create', [MaintenanceController::class, 'create'])->name('maintenance-requests.create');
+    Route::post('/maintenance-requests', [MaintenanceController::class, 'store'])->name('maintenance-requests.store');
+    Route::get('/maintenance-requests/{maintenanceRequest}', [MaintenanceController::class, 'show'])->name('maintenance-requests.show');
+    Route::post('/maintenance-requests/{maintenanceRequest}/comments', [MaintenanceController::class, 'storeComment'])->name('maintenance-requests.comments.store');
 });

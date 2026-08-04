@@ -185,7 +185,7 @@ class BookingLifecycleService
                 'room_id' => $locked->room_id,
                 'booking_id' => $locked->id,
                 'start_date' => $locked->start_date,
-                'end_date' => $locked->start_date->copy()->addMonths($locked->duration_months),
+                'end_date' => $locked->start_date->copy()->addMonthsNoOverflow($locked->duration_months),
                 'duration_months' => $locked->duration_months,
                 'monthly_price' => $locked->monthly_price,
                 'deposit_amount' => $locked->deposit_amount,

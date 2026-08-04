@@ -7,10 +7,13 @@ use App\Domain\Living\Models\Building;
 use App\Domain\Living\Models\Facility;
 use App\Domain\Living\Models\Floor;
 use App\Domain\Living\Models\Invoice;
+use App\Domain\Living\Models\Lease;
+use App\Domain\Living\Models\MaintenanceRequest;
 use App\Domain\Living\Models\Payment;
 use App\Domain\Living\Models\Property;
 use App\Domain\Living\Models\Room;
 use App\Domain\Living\Models\RoomType;
+use App\Domain\Living\Models\Tenant;
 use App\Domain\Platform\Models\ApplicationSetting;
 use App\Domain\Platform\Models\AuditLog;
 use App\Domain\Platform\Models\ContentPage;
@@ -25,8 +28,11 @@ use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
 use App\Policies\BookingPolicy;
 use App\Policies\InvoicePolicy;
+use App\Policies\LeasePolicy;
+use App\Policies\MaintenanceRequestPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\RoomManagementPolicy;
+use App\Policies\TenantPolicy;
 use App\Policies\TestimonialPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -67,5 +73,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Booking::class, BookingPolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
+        Gate::policy(Tenant::class, TenantPolicy::class);
+        Gate::policy(Lease::class, LeasePolicy::class);
+        Gate::policy(MaintenanceRequest::class, MaintenanceRequestPolicy::class);
     }
 }

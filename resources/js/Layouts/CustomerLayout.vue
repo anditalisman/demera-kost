@@ -30,6 +30,13 @@ const page = usePage<PageProps>();
                         Tagihan Saya
                     </Link>
                     <Link
+                        :href="route('maintenance-requests.index')"
+                        class="text-sm font-medium"
+                        :class="route().current('maintenance-requests.*') ? 'text-terracotta-600' : 'text-charcoal-500 hover:text-terracotta-600'"
+                    >
+                        Keluhan
+                    </Link>
+                    <Link
                         :href="route('profile.edit')"
                         class="text-sm font-medium"
                         :class="route().current('profile.edit') ? 'text-terracotta-600' : 'text-charcoal-500 hover:text-terracotta-600'"

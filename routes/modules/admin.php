@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ApplicationSettingController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\FacilityController;
@@ -9,10 +10,13 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\LeaseController;
+use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\RoomTypeController;
+use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -105,6 +109,25 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/payments/{payment}/proof', [PaymentController::class, 'proof'])->name('payments.proof');
     Route::put('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
     Route::put('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
+
+    Route::get('/tenants', [TenantController::class, 'index'])->name('tenants.index');
+    Route::get('/tenants/{tenant}', [TenantController::class, 'show'])->name('tenants.show');
+
+    Route::get('/leases', [LeaseController::class, 'index'])->name('leases.index');
+    Route::get('/leases/{lease}', [LeaseController::class, 'show'])->name('leases.show');
+    Route::post('/leases/{lease}/extend', [LeaseController::class, 'extend'])->name('leases.extend');
+    Route::post('/leases/{lease}/transfer', [LeaseController::class, 'transferRoom'])->name('leases.transfer');
+    Route::post('/leases/{lease}/terminate', [LeaseController::class, 'terminate'])->name('leases.terminate');
+
+    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::put('/bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
+    Route::put('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
+
+    Route::get('/maintenance-requests', [MaintenanceController::class, 'index'])->name('maintenance-requests.index');
+    Route::get('/maintenance-requests/{maintenanceRequest}', [MaintenanceController::class, 'show'])->name('maintenance-requests.show');
+    Route::put('/maintenance-requests/{maintenanceRequest}/status', [MaintenanceController::class, 'updateStatus'])->name('maintenance-requests.status.update');
+    Route::post('/maintenance-requests/{maintenanceRequest}/comments', [MaintenanceController::class, 'storeComment'])->name('maintenance-requests.comments.store');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {
