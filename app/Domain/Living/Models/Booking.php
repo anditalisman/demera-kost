@@ -12,8 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'user_id', 'room_id', 'status', 'start_date', 'duration_months', 'monthly_price',
+    'booking_code', 'user_id', 'room_id', 'status', 'start_date', 'duration_months', 'monthly_price',
     'deposit_amount', 'admin_fee', 'discount_amount', 'total_amount', 'payment_due_at', 'notes',
+    'confirmed_at', 'cancelled_at', 'cancellation_reason', 'verified_by', 'verified_at',
 ])]
 class Booking extends Model
 {

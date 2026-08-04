@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Living\BookingController;
 use App\Http\Controllers\Living\LivingController;
 use App\Http\Controllers\Living\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -19,4 +20,11 @@ Route::prefix('living')->name('living.')->group(function () {
     Route::get('/location', [LivingController::class, 'location'])->name('location');
     Route::get('/faq', [LivingController::class, 'faq'])->name('faq');
     Route::get('/contact', [LivingController::class, 'contact'])->name('contact');
+
+    Route::middleware(['auth', 'verified'])->get('/rooms/{slug}/book', [BookingController::class, 'create'])->name('rooms.book');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{code}', [BookingController::class, 'show'])->name('bookings.show');
 });

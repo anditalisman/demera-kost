@@ -20,14 +20,15 @@ class ApplicationSettingSeeder extends Seeder
             'social_tiktok' => ['value' => 'https://tiktok.com/@demera.id', 'group' => 'social', 'label' => 'TikTok URL'],
             'seo_default_title' => ['value' => 'Demera — Fashion & Living', 'group' => 'seo', 'label' => 'Meta Title Default'],
             'seo_default_description' => ['value' => 'Demera menghadirkan kost nyaman dan terpercaya melalui Demera Living, serta fashion editorial melalui Demera Fashion.', 'group' => 'seo', 'label' => 'Meta Description Default'],
+            'booking_hold_hours' => ['value' => '24', 'group' => 'booking', 'label' => 'Batas Waktu Pembayaran Booking (jam)', 'type' => 'number', 'is_public' => false],
         ];
 
         foreach ($settings as $key => $attrs) {
             ApplicationSetting::set($key, $attrs['value'], [
-                'type' => 'string',
+                'type' => $attrs['type'] ?? 'string',
                 'group' => $attrs['group'],
                 'label' => $attrs['label'],
-                'is_public' => true,
+                'is_public' => $attrs['is_public'] ?? true,
             ]);
         }
     }

@@ -12,8 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'tenant_id', 'room_id', 'booking_id', 'start_date', 'end_date', 'duration_months',
+    'lease_number', 'tenant_id', 'room_id', 'booking_id', 'start_date', 'end_date', 'duration_months',
     'monthly_price', 'deposit_amount', 'billing_cycle_day', 'status', 'terms',
+    'signed_at', 'signed_document_path', 'approved_by', 'approved_at', 'cancelled_at', 'cancellation_reason',
 ])]
 class Lease extends Model
 {

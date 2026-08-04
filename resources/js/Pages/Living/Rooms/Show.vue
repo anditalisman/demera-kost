@@ -166,13 +166,20 @@ function prevImage() {
                             biaya kerusakan bila ada.
                         </p>
 
+                        <Link
+                            v-if="isAvailable"
+                            :href="route('living.rooms.book', room.slug)"
+                            class="mt-6 flex w-full items-center justify-center rounded-lg bg-terracotta-500 px-4 py-3 text-sm font-semibold text-white hover:bg-terracotta-600"
+                        >
+                            Pesan Sekarang
+                        </Link>
                         <button
+                            v-else
                             type="button"
                             disabled
                             class="mt-6 w-full cursor-not-allowed rounded-lg bg-beige-200 px-4 py-3 text-sm font-semibold text-charcoal-400"
-                            title="Pemesanan online segera hadir"
                         >
-                            Pemesanan Online Segera Hadir
+                            Kamar Tidak Tersedia
                         </button>
 
                         <a

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Domain\Living\Models\Booking;
 use App\Domain\Living\Models\Building;
 use App\Domain\Living\Models\Facility;
 use App\Domain\Living\Models\Floor;
@@ -20,6 +21,7 @@ use App\Policies\AuditLogPolicy;
 use App\Policies\ContentPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
+use App\Policies\BookingPolicy;
 use App\Policies\RoomManagementPolicy;
 use App\Policies\TestimonialPolicy;
 use App\Policies\UserPolicy;
@@ -58,5 +60,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RoomType::class, RoomManagementPolicy::class);
         Gate::policy(Room::class, RoomManagementPolicy::class);
         Gate::policy(Facility::class, RoomManagementPolicy::class);
+        Gate::policy(Booking::class, BookingPolicy::class);
     }
 }

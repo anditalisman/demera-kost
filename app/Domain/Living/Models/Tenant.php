@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Models;
 
+use App\Enums\TenantStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -22,6 +23,7 @@ class Tenant extends Model
     protected function casts(): array
     {
         return [
+            'status' => TenantStatus::class,
             'joined_at' => 'date',
             'moved_out_at' => 'date',
         ];

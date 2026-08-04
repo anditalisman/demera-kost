@@ -34,6 +34,9 @@ class ApplicationSettingController extends Controller
             'seo_default_title' => ['label' => 'Meta Title Default', 'type' => 'string'],
             'seo_default_description' => ['label' => 'Meta Description Default', 'type' => 'string'],
         ],
+        'booking' => [
+            'booking_hold_hours' => ['label' => 'Batas Waktu Pembayaran Booking (jam)', 'type' => 'number'],
+        ],
     ];
 
     public function index(): Response

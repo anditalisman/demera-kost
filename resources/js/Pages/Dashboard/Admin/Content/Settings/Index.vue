@@ -19,6 +19,7 @@ const GROUP_LABELS: Record<string, string> = {
     contact: 'Kontak & Lokasi',
     social: 'Media Sosial',
     seo: 'SEO',
+    booking: 'Pemesanan',
 };
 
 const initialValues: Record<string, string> = {};
