@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\LandingController;
 use App\Http\Controllers\Public\PolicyPageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,9 +11,7 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return Inertia::render('Public/Landing');
-})->name('landing');
+Route::get('/', [LandingController::class, 'show'])->name('landing');
 
 Route::get('/kebijakan/{slug}', [PolicyPageController::class, 'show'])->name('policies.show');
 

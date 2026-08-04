@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
+import { Head } from '@inertiajs/vue3';
 
 defineProps<{
     page: {
@@ -14,19 +15,8 @@ defineProps<{
 <template>
     <Head :title="page.title" />
 
-    <div class="min-h-screen bg-cream-50">
-        <header class="border-b border-beige-200 bg-white">
-            <div class="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-                <Link href="/" class="font-display text-xl font-semibold text-charcoal-800">
-                    Demera<span class="text-terracotta-500">.</span>
-                </Link>
-                <Link href="/" class="text-sm text-charcoal-500 hover:text-terracotta-600">
-                    &larr; Kembali ke Beranda
-                </Link>
-            </div>
-        </header>
-
-        <main class="mx-auto max-w-3xl px-6 py-12">
+    <PublicLayout>
+        <div class="mx-auto max-w-3xl px-6 py-16">
             <h1 class="font-display text-3xl font-semibold text-charcoal-800">
                 {{ page.title }}
             </h1>
@@ -36,6 +26,6 @@ defineProps<{
                 class="prose prose-neutral mt-8 max-w-none prose-headings:font-display prose-a:text-terracotta-600"
                 v-html="page.body"
             />
-        </main>
-    </div>
+        </div>
+    </PublicLayout>
 </template>

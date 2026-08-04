@@ -23,4 +23,14 @@ export type PageProps<
         error: string | null;
         status: string | null;
     };
+    settings: {
+        whatsapp: string;
+        email: string;
+        phone: string | null;
+        address: string;
+        mapEmbedUrl: string | null;
+        instagram: string | null;
+        facebook: string | null;
+        tiktok: string | null;
+    };
 };
