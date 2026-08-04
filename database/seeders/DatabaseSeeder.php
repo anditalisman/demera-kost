@@ -14,6 +14,16 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             SuperAdminSeeder::class,
+            DemoStaffSeeder::class,
+            ContentPageSeeder::class,
+            ApplicationSettingSeeder::class,
+            FacilitySeeder::class,
+            PropertySeeder::class,
+            GallerySeeder::class,
+            TestimonialSeeder::class,
+            FaqSeeder::class,
+            NotificationTemplateSeeder::class,
+            TenantBookingSeeder::class,
         ]);
     }
 }
