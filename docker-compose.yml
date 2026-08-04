@@ -1,0 +1,163 @@
+name: demera
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: demera/app:dev
+    container_name: demera_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - PHP_IDE_CONFIG=serverName=demera
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks: [demera]
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: demera_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks: [demera]
+
+  mysql:
+    image: mysql:8.0
+    container_name: demera_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-demera}
+      MYSQL_USER: ${DB_USERNAME:-demera}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    ports:
+      - "${DB_FORWARD_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [demera]
+
+  redis:
+    image: redis:7-alpine
+    container_name: demera_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks: [demera]
+
+  minio:
+    image: minio/minio:latest
+    container_name: demera_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-demera_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-demera_minio_secret}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [demera]
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: demera_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-demera_minio} ${MINIO_ROOT_PASSWORD:-demera_minio_secret} &&
+      mc mb -p local/${MINIO_BUCKET_PUBLIC:-demera-public} &&
+      mc mb -p local/${MINIO_BUCKET_PRIVATE:-demera-private} &&
+      mc anonymous set download local/${MINIO_BUCKET_PUBLIC:-demera-public} &&
+      mc anonymous set none local/${MINIO_BUCKET_PRIVATE:-demera-private} &&
+      exit 0
+      "
+    networks: [demera]
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: demera/app:dev
+    container_name: demera_queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: ["php", "artisan", "queue:work", "redis", "--queue=default,notifications", "--sleep=3", "--tries=3"]
+    networks: [demera]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: demera/app:dev
+    container_name: demera_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    env_file: .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    entrypoint: ["/bin/sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+    networks: [demera]
+
+  vite:
+    image: node:20-alpine
+    container_name: demera_vite
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${VITE_PORT:-5173}:5173"
+    command: ["sh", "-c", "npm install && npm run dev -- --host 0.0.0.0"]
+    profiles: ["dev-assets"]
+    networks: [demera]
+
+networks:
+  demera:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  minio_data:
