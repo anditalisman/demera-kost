@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['property_id', 'name', 'slug', 'description', 'base_price', 'base_deposit', 'size_sqm', 'default_capacity'])]
 class RoomType extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected function casts(): array

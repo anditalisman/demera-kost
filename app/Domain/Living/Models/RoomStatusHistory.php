@@ -3,9 +3,11 @@
 namespace App\Domain\Living\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable(['room_id', 'from_status', 'to_status', 'reason', 'changed_by', 'booking_id'])]
 class RoomStatusHistory extends Model
 {
     public $timestamps = false;

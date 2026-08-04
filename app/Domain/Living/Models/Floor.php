@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['building_id', 'name', 'level', 'description'])]
 class Floor extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     public function building(): BelongsTo

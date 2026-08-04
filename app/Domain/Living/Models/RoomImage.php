@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 #[Fillable(['room_id', 'path', 'thumbnail_path', 'is_primary', 'sort_order', 'caption'])]
 class RoomImage extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected $appends = ['url', 'thumbnail_url'];

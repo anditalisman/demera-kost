@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Domain\Living\Models\Building;
+use App\Domain\Living\Models\Facility;
+use App\Domain\Living\Models\Floor;
+use App\Domain\Living\Models\Property;
+use App\Domain\Living\Models\Room;
+use App\Domain\Living\Models\RoomType;
 use App\Domain\Platform\Models\ApplicationSetting;
 use App\Domain\Platform\Models\AuditLog;
 use App\Domain\Platform\Models\ContentPage;
@@ -14,6 +20,7 @@ use App\Policies\AuditLogPolicy;
 use App\Policies\ContentPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
+use App\Policies\RoomManagementPolicy;
 use App\Policies\TestimonialPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -44,5 +51,12 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Faq::class, FaqPolicy::class);
         Gate::policy(ApplicationSetting::class, ApplicationSettingPolicy::class);
         Gate::policy(AuditLog::class, AuditLogPolicy::class);
+
+        Gate::policy(Property::class, RoomManagementPolicy::class);
+        Gate::policy(Building::class, RoomManagementPolicy::class);
+        Gate::policy(Floor::class, RoomManagementPolicy::class);
+        Gate::policy(RoomType::class, RoomManagementPolicy::class);
+        Gate::policy(Room::class, RoomManagementPolicy::class);
+        Gate::policy(Facility::class, RoomManagementPolicy::class);
     }
 }

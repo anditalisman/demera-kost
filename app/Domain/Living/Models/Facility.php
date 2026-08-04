@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['name', 'slug', 'icon', 'type', 'description', 'sort_order', 'is_active'])]
 class Facility extends Model
 {
+    use HasFactory;
     use SoftDeletes;
 
     protected function casts(): array

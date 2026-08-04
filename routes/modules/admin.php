@@ -2,9 +2,15 @@
 
 use App\Http\Controllers\Admin\ApplicationSettingController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\BuildingController;
 use App\Http\Controllers\Admin\ContentPageController;
+use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\PropertyController;
+use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\RoomTypeController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
@@ -50,6 +56,43 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::put('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
 
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+
+    Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+    Route::post('/properties', [PropertyController::class, 'store'])->name('properties.store');
+    Route::put('/properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
+    Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->name('properties.destroy');
+
+    Route::post('/properties/{property}/buildings', [BuildingController::class, 'store'])->name('buildings.store');
+    Route::put('/buildings/{building}', [BuildingController::class, 'update'])->name('buildings.update');
+    Route::delete('/buildings/{building}', [BuildingController::class, 'destroy'])->name('buildings.destroy');
+
+    Route::post('/buildings/{building}/floors', [FloorController::class, 'store'])->name('floors.store');
+    Route::put('/floors/{floor}', [FloorController::class, 'update'])->name('floors.update');
+    Route::delete('/floors/{floor}', [FloorController::class, 'destroy'])->name('floors.destroy');
+
+    Route::get('/room-types', [RoomTypeController::class, 'index'])->name('room-types.index');
+    Route::post('/room-types', [RoomTypeController::class, 'store'])->name('room-types.store');
+    Route::put('/room-types/{roomType}', [RoomTypeController::class, 'update'])->name('room-types.update');
+    Route::delete('/room-types/{roomType}', [RoomTypeController::class, 'destroy'])->name('room-types.destroy');
+
+    Route::get('/facilities', [FacilityController::class, 'index'])->name('facilities.index');
+    Route::post('/facilities', [FacilityController::class, 'store'])->name('facilities.store');
+    Route::put('/facilities/{facility}', [FacilityController::class, 'update'])->name('facilities.update');
+    Route::delete('/facilities/{facility}', [FacilityController::class, 'destroy'])->name('facilities.destroy');
+
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+    Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+    Route::put('/rooms/{room}/facilities', [RoomController::class, 'updateFacilities'])->name('rooms.facilities.update');
+    Route::put('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.status.update');
+    Route::post('/rooms/bulk-status', [RoomController::class, 'bulkStatus'])->name('rooms.bulk-status');
+    Route::post('/rooms/{room}/photos', [RoomController::class, 'storePhoto'])->name('rooms.photos.store');
+    Route::put('/rooms/{room}/photos/reorder', [RoomController::class, 'reorderPhotos'])->name('rooms.photos.reorder');
+    Route::put('/rooms/{room}/photos/{roomImage}/primary', [RoomController::class, 'setPrimaryPhoto'])->name('rooms.photos.primary');
+    Route::delete('/rooms/{room}/photos/{roomImage}', [RoomController::class, 'destroyPhoto'])->name('rooms.photos.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {

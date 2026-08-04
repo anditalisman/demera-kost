@@ -23,6 +23,15 @@ const navItems = computed(() => {
         );
     }
 
+    if (route().has('admin.rooms.index') && (can('rooms.view') || can('rooms.manage'))) {
+        items.push(
+            { label: 'Kamar', href: route('admin.rooms.index'), active: route().current('admin.rooms.*') },
+            { label: 'Struktur Properti', href: route('admin.properties.index'), active: route().current('admin.properties.index') },
+            { label: 'Tipe Kamar', href: route('admin.room-types.index'), active: route().current('admin.room-types.index') },
+            { label: 'Fasilitas', href: route('admin.facilities.index'), active: route().current('admin.facilities.index') },
+        );
+    }
+
     if (route().has('admin.users.index') && (can('users.view') || can('users.manage'))) {
         items.push({ label: 'Pengguna', href: route('admin.users.index'), active: route().current('admin.users.index') });
     }
