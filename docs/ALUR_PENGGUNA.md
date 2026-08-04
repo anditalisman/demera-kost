@@ -50,7 +50,7 @@ flowchart TD
     E --> F
     F -->|Gagal 5x dalam 1 menit| G[Rate limited, tunggu N detik]
     F -->|Berhasil| H{must_change_password?}
-    H -->|true, contoh: akun super-admin baru| I[/force-password-update — wajib]
+    H -->|true, contoh: akun admin baru| I[/force-password-update — wajib]
     H -->|false| J[/dashboard — redirect sesuai role]
 ```
 
@@ -58,9 +58,9 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[/dashboard] --> B{hasAnyRole super-admin/admin/property-manager/finance?}
+    A[/dashboard] --> B{hasRole admin?}
     B -->|Ya| C[/admin/dashboard]
-    B -->|Tidak — customer/tenant| D[/account/dashboard]
+    B -->|Tidak — customer| D[/account/dashboard]
 ```
 
 ## 5. Admin mengelola konten (CMS)
@@ -77,7 +77,7 @@ flowchart TD
 
 Pola yang sama berlaku untuk Galeri (+ drag-to-reorder), Testimoni, dan FAQ.
 
-## 6. Super-admin mengubah role pengguna
+## 6. Admin mengubah role pengguna
 
 ```mermaid
 flowchart TD

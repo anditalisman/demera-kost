@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Cache;
 use Spatie\Permission\Models\Permission;
@@ -11,6 +12,10 @@ class RolePermissionSeeder extends Seeder
 {
     /**
      * Permission matrix per module. Every permission is named "{module}.{action}".
+     * Kept granular (rather than collapsing to a single "admin.*" check)
+     * so Policy classes stay meaningful and future roles can be reintroduced
+     * without touching every controller — but Tahap 1 ships with exactly
+     * two roles, and "admin" simply holds all of them.
      */
     private const PERMISSIONS = [
         'users' => ['view', 'manage'],
@@ -31,22 +36,21 @@ class RolePermissionSeeder extends Seeder
      * Role => permissions granted. "*" grants every permission.
      */
     private const ROLES = [
-        'super-admin' => ['*'],
-        'admin' => [
-            'users.view', 'content.manage', 'settings.view',
-            'rooms.manage', 'bookings.manage', 'tenants.manage', 'leases.manage',
-            'maintenance.manage', 'invoices.view', 'payments.view',
-            'reports.view', 'reports.export', 'audit-logs.view',
-        ],
-        'property-manager' => [
-            'rooms.manage', 'bookings.manage', 'tenants.manage', 'leases.manage',
-            'maintenance.manage', 'reports.view',
-        ],
-        'finance' => [
-            'invoices.manage', 'payments.manage', 'reports.view', 'reports.export',
-        ],
+        'admin' => ['*'],
         'customer' => [],
-        'tenant' => [],
+    ];
+
+    /**
+     * Legacy roles from the earlier 6-role design. Any user still holding
+     * one of these gets remapped to its replacement below before the old
+     * Role rows are deleted — keeps re-running this seeder safe on a
+     * database that predates the 2-role simplification.
+     */
+    private const LEGACY_ROLE_REPLACEMENTS = [
+        'super-admin' => 'admin',
+        'property-manager' => 'admin',
+        'finance' => 'admin',
+        'tenant' => 'customer',
     ];
 
     public function run(): void
@@ -67,6 +71,23 @@ class RolePermissionSeeder extends Seeder
             } else {
                 $role->syncPermissions($permissions);
             }
+        }
+
+        $this->migrateLegacyRoles();
+    }
+
+    private function migrateLegacyRoles(): void
+    {
+        foreach (self::LEGACY_ROLE_REPLACEMENTS as $legacy => $replacement) {
+            $legacyRole = Role::where('name', $legacy)->first();
+
+            if (! $legacyRole) {
+                continue;
+            }
+
+            User::role($legacy)->get()->each(fn (User $user) => $user->assignRole($replacement));
+
+            $legacyRole->delete();
         }
     }
 }

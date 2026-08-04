@@ -27,7 +27,7 @@ selanjutnya, disalin & disesuaikan dari spesifikasi awal proyek.
 - [x] Dashboard admin (shell) + manajemen pengguna/role
 - [x] Audit log otomatis (perubahan CMS + event auth) + viewer admin
 - [x] Dokumentasi OpenAPI/Swagger untuk API publik v1
-- [x] Data awal: seeder lengkap (role, super-admin, staf demo, 1 properti, 12 kamar
+- [x] Data awal: seeder lengkap (role, akun admin, staf demo, 1 properti, 12 kamar
       dengan 6 status berbeda, fasilitas, foto placeholder, penyewa contoh, booking
       contoh, invoice & pembayaran contoh, template notifikasi, FAQ, testimoni)
 - [x] 75 automated test (PHPUnit) mencakup auth, RBAC, CRUD CMS, halaman publik, seeder
@@ -69,7 +69,7 @@ ada UI/logika bisnisnya — ini keputusan cakupan, bukan bagian yang terlewat:
 - Invoice otomatis dari booking
 - Integrasi payment gateway (Virtual Account, QRIS, e-wallet) lewat abstraction layer
   yang sudah disiapkan (`PAYMENT_GATEWAY_PROVIDER`)
-- Transfer manual + verifikasi finance
+- Transfer manual + QRIS (gambar diunggah admin) + verifikasi admin
 - Webhook + idempotency (tabel `payment_webhooks`, kolom `idempotency_key` sudah siap)
 - Kuitansi & invoice PDF
 - Tagihan bulanan otomatis (job terjadwal), prorata, denda keterlambatan

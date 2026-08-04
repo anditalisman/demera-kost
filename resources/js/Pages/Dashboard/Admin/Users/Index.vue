@@ -38,12 +38,8 @@ watch(search, (value) => {
 });
 
 const ROLE_LABELS: Record<string, string> = {
-    'super-admin': 'Super Admin',
     admin: 'Admin',
-    'property-manager': 'Pengelola Kost',
-    finance: 'Finance',
     customer: 'Customer',
-    tenant: 'Penyewa Aktif',
 };
 
 const showModal = ref(false);

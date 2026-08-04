@@ -13,7 +13,7 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
-    private const ASSIGNABLE_ROLES = ['super-admin', 'admin', 'property-manager', 'finance', 'customer', 'tenant'];
+    private const ASSIGNABLE_ROLES = ['admin', 'customer'];
 
     public function index(Request $request): Response
     {

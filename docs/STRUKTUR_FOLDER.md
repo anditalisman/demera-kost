@@ -29,7 +29,7 @@ app/
 
   Http/
     Controllers/
-      Admin/          CMS + user/settings/audit-log management (super-admin/admin)
+      Admin/          CMS + user/settings/audit-log management (role: admin)
       Auth/           Breeze-derived, customized for WhatsApp login + force-password-change
       Api/            Public JSON API v1 controllers (Room, ...)
       Fashion/        Coming-soon pages + launch subscription

@@ -44,7 +44,7 @@ class TenantBookingSeeder extends Seeder
                     'is_active' => true,
                 ],
             );
-            $user->syncRoles(['tenant']);
+            $user->syncRoles(['customer']);
 
             $booking = Booking::create([
                 'booking_code' => 'BK-'.now()->subMonths(2)->format('Ymd').'-'.Str::upper(Str::random(6)),

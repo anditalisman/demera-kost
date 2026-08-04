@@ -15,7 +15,7 @@ class UserManagementTest extends TestCase
     {
         $this->seed(RolePermissionSeeder::class);
         $user = User::factory()->create();
-        $user->assignRole('super-admin');
+        $user->assignRole('admin');
 
         return $user;
     }
@@ -44,10 +44,10 @@ class UserManagementTest extends TestCase
         $target->assignRole('customer');
 
         $this->actingAs($admin)->put("/admin/users/{$target->id}/roles", [
-            'roles' => ['property-manager'],
+            'roles' => ['admin'],
         ])->assertRedirect();
 
-        $this->assertTrue($target->fresh()->hasRole('property-manager'));
+        $this->assertTrue($target->fresh()->hasRole('admin'));
         $this->assertFalse($target->fresh()->hasRole('customer'));
     }
 

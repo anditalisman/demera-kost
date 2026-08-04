@@ -84,7 +84,7 @@ S3 asli, nilai itu dikosongkan sehingga tidak ada penulisan ulang.
 
 ## RBAC
 
-6 role (`super-admin`, `admin`, `property-manager`, `finance`, `customer`, `tenant`) dengan
+2 role (`admin`, `customer`) dengan
 matriks permission bergaya `{modul}.{aksi}` (lihat `docs/ROLE_PERMISSION.md` untuk daftar
 lengkap). Diberlakukan di tiga lapis:
 
@@ -120,7 +120,8 @@ kontrak provider (belum dibuat — akan hadir di Tahap 6).
 Skema (`invoices`, `invoice_items`, `payments`, `payment_webhooks`, `refunds`, `deposits`)
 sudah lengkap dengan `idempotency_key` unik pada `payments` dan tabel `payment_webhooks`
 terpisah untuk audit trail webhook mentah. `PAYMENT_GATEWAY_PROVIDER=manual` di Tahap 1
-berarti hanya alur transfer manual + verifikasi finance yang aktif; integrasi Midtrans/
+berarti hanya alur transfer manual + QRIS (gambar diunggah admin) + verifikasi admin
+yang aktif; integrasi Midtrans/
 Xendit menyusul di Tahap 4 lewat abstraction layer yang sama.
 
 ## Docker vs Non-Docker

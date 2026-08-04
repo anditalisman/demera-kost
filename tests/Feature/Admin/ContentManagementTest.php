@@ -20,7 +20,7 @@ class ContentManagementTest extends TestCase
     {
         $this->seed(RolePermissionSeeder::class);
         $user = User::factory()->create();
-        $user->assignRole('super-admin');
+        $user->assignRole('admin');
 
         return $user;
     }

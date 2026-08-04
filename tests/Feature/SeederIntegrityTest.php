@@ -47,37 +47,36 @@ class SeederIntegrityTest extends TestCase
         ]);
     }
 
-    public function test_all_six_roles_exist_with_permissions(): void
+    public function test_both_roles_exist_with_permissions(): void
     {
         $this->seed(RolePermissionSeeder::class);
 
         $roles = Role::pluck('name')->all();
-        foreach (['super-admin', 'admin', 'property-manager', 'finance', 'customer', 'tenant'] as $expected) {
+        foreach (['admin', 'customer'] as $expected) {
             $this->assertContains($expected, $roles);
         }
 
         $this->assertGreaterThan(0, Permission::count());
-        $this->assertTrue(Role::findByName('super-admin')->permissions->count() === Permission::count());
+        $this->assertTrue(Role::findByName('admin')->permissions->count() === Permission::count());
+        $this->assertSame(0, Role::findByName('customer')->permissions->count());
     }
 
-    public function test_super_admin_is_seeded_from_env_and_must_change_password(): void
+    public function test_root_admin_is_seeded_from_env_and_must_change_password(): void
     {
         $this->seed([RolePermissionSeeder::class, SuperAdminSeeder::class]);
 
         $admin = User::query()->where('email', env('SUPERADMIN_EMAIL', 'superadmin@demera.my.id'))->first();
 
         $this->assertNotNull($admin);
-        $this->assertTrue($admin->hasRole('super-admin'));
+        $this->assertTrue($admin->hasRole('admin'));
         $this->assertTrue($admin->must_change_password);
     }
 
-    public function test_demo_staff_accounts_have_correct_single_roles(): void
+    public function test_demo_staff_account_has_admin_role(): void
     {
         $this->seed([RolePermissionSeeder::class, DemoStaffSeeder::class]);
 
         $this->assertTrue(User::where('email', 'admin@demera.my.id')->first()?->hasRole('admin'));
-        $this->assertTrue(User::where('email', 'pengelola@demera.my.id')->first()?->hasRole('property-manager'));
-        $this->assertTrue(User::where('email', 'finance@demera.my.id')->first()?->hasRole('finance'));
     }
 
     public function test_policy_pages_required_by_register_and_footer_are_seeded(): void

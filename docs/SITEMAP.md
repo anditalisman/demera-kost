@@ -1,7 +1,7 @@
 # Sitemap — Tahap 1
 
 Legenda akses: **Publik** (tanpa login) · **Auth** (login apa pun) · **Admin** (role
-`super-admin`/`admin`/`property-manager`/`finance`, digerbangi permission per halaman).
+`admin`, digerbangi permission per halaman).
 
 ## Publik
 

@@ -1,10 +1,10 @@
 # Panduan Penggunaan Admin — Tahap 1
 
-Panduan ini untuk staf yang memegang role `super-admin` atau `admin`. Fitur kamar,
+Panduan ini untuk staf yang memegang role `admin`. Fitur kamar,
 booking, penyewa, kontrak, tagihan, dan laporan belum ada di Tahap 1 — panduan
 penggunaannya menyusul bersama fiturnya di Tahap 2–7 (lihat `docs/ROADMAP.md`).
 
-## Login pertama kali (Super Admin)
+## Login pertama kali (Admin)
 
 1. Buka `/login`, masuk dengan email dan password dari `SUPERADMIN_EMAIL`/
    `SUPERADMIN_PASSWORD` di `.env` produksi.
@@ -50,7 +50,7 @@ publik (tombol WhatsApp, footer, embed peta) tanpa perlu deploy ulang.
 ## Mengelola Pengguna & Role
 
 Menu **Pengguna** (hanya terlihat bila akun Anda punya izin `users.view`/`users.manage`,
-biasanya hanya `super-admin`):
+biasanya semua admin, karena hanya ada satu tingkat admin):
 
 1. Cari pengguna lewat nama, email, atau nomor WhatsApp.
 2. Klik **Atur Role** untuk mengubah role seorang pengguna (bisa lebih dari satu role).
@@ -71,7 +71,7 @@ kapan, dari IP mana. Bisa difilter berdasarkan jenis aksi (`created`, `updated`,
 A: Fitur tersebut belum dikembangkan di Tahap 1 — bukan masalah izin akses. Lihat
 `docs/ROADMAP.md` untuk jadwal tahap berikutnya.
 
-**Q: Saya lupa password akun staf (bukan super-admin).**
+**Q: Saya lupa password akun staf.**
 A: Gunakan alur **Lupa Password** di halaman login seperti pengguna biasa — tautan
 reset dikirim ke email yang terdaftar (di lingkungan dev, tautan muncul di
 `storage/logs/laravel.log` karena `MAIL_MAILER=log`).

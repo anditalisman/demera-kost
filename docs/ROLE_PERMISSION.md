@@ -4,42 +4,53 @@ Sumber kebenaran: `database/seeders/RolePermissionSeeder.php`. Permission bernam
 `{modul}.{aksi}`, diperiksa lewat `$user->can('...')` dan ditegakkan di Policy
 (`app/Policies/*`) serta di route/controller admin.
 
-## 6 Role
+## 2 Role
+
+Disederhanakan dari desain awal 6-role menjadi 2 role sesuai kebutuhan operasional:
 
 | Role | Deskripsi | Cakupan |
 |---|---|---|
-| `super-admin` | Pemilik sistem | **Seluruh permission**, termasuk yang tidak dimiliki `admin` (users.manage, settings.manage) |
-| `admin` | Staf operasional harian | Konten, lihat pengguna, lihat pengaturan, kelola kamar/booking/penyewa/kontrak/perawatan, lihat tagihan/pembayaran, laporan, audit log |
-| `property-manager` | Pengelola kost | Hanya operasional kamar: rooms, bookings, tenants, leases, maintenance, lihat laporan |
-| `finance` | Tim keuangan | Hanya uang: invoices, payments, lihat & ekspor laporan |
-| `customer` | Calon penyewa (default saat registrasi) | Tidak ada permission admin — akses lewat dashboard pengguna biasa |
-| `tenant` | Penyewa aktif | Sama seperti customer secara permission; dibedakan untuk keperluan tampilan/status di masa depan (kontrak aktif, dsb.) |
+| `admin` | Staf pengelola (satu tingkat, tanpa sub-peran) | **Seluruh permission** — konten, pengguna, pengaturan, kamar, booking, penyewa, kontrak, tagihan, pembayaran, laporan, audit log |
+| `customer` | Calon penyewa & penyewa aktif (default saat registrasi) | Tidak ada permission admin — akses lewat dashboard pengguna biasa. Status "calon" vs "penyewa aktif" dibedakan lewat data (`tenants.status`), bukan role terpisah |
+
+Akun admin pertama (root) dibuat dari `SUPERADMIN_*` di `.env` lewat
+`SuperAdminSeeder` — nama environment variable-nya dipertahankan (`SUPERADMIN_*`)
+untuk kompatibilitas, meski rolenya sekarang bernama `admin`, bukan `super-admin`.
 
 ## Matriks Permission
 
-| Permission | super-admin | admin | property-manager | finance |
-|---|:---:|:---:|:---:|:---:|
-| `users.view` | ✅ | ✅ | | |
-| `users.manage` | ✅ | | | |
-| `content.view` | ✅ | | | |
-| `content.manage` | ✅ | ✅ | | |
-| `settings.view` | ✅ | ✅ | | |
-| `settings.manage` | ✅ | | | |
-| `rooms.view` / `rooms.manage` | ✅ | ✅ | ✅ | |
-| `bookings.view` / `bookings.manage` | ✅ | ✅ | ✅ | |
-| `tenants.view` / `tenants.manage` | ✅ | ✅ | ✅ | |
-| `leases.view` / `leases.manage` | ✅ | ✅ | ✅ | |
-| `maintenance.view` / `maintenance.manage` | ✅ | ✅ | ✅ | |
-| `invoices.view` | ✅ | ✅ | | |
-| `invoices.manage` | ✅ | | | ✅ |
-| `payments.view` | ✅ | ✅ | | |
-| `payments.verify` / `payments.manage` | ✅ | | | ✅ |
-| `reports.view` | ✅ | ✅ | ✅ | ✅ |
-| `reports.export` | ✅ | ✅ | | ✅ |
-| `audit-logs.view` | ✅ | ✅ | | |
+| Permission | admin | customer |
+|---|:---:|:---:|
+| `users.view` / `users.manage` | ✅ | |
+| `content.view` / `content.manage` | ✅ | |
+| `settings.view` / `settings.manage` | ✅ | |
+| `rooms.view` / `rooms.manage` | ✅ | |
+| `bookings.view` / `bookings.manage` | ✅ | |
+| `tenants.view` / `tenants.manage` | ✅ | |
+| `leases.view` / `leases.manage` | ✅ | |
+| `maintenance.view` / `maintenance.manage` | ✅ | |
+| `invoices.view` / `invoices.manage` | ✅ | |
+| `payments.view` / `payments.verify` / `payments.manage` | ✅ | |
+| `reports.view` / `reports.export` | ✅ | |
+| `audit-logs.view` | ✅ | |
 
-`customer` dan `tenant` tidak memegang permission apa pun di atas — keduanya diverifikasi
-lewat test otomatis (`tests/Feature/Admin/RolePermissionMatrixTest.php`).
+`customer` tidak memegang permission apa pun di atas — permission granular tetap
+dipertahankan di dalam kode (Policy per resource) walau saat ini hanya satu role
+("admin") yang memegang semuanya lewat wildcard `syncPermissions(Permission::all())`
+— ini sengaja, supaya bila di masa depan dibutuhkan sub-peran staf lagi (mis.
+finance-only), tinggal menambah role baru dengan subset permission tanpa mengubah
+satu pun Policy/controller yang sudah ada.
+
+Diverifikasi lewat `tests/Feature/Admin/RolePermissionMatrixTest.php`.
+
+## Migrasi dari desain 6-role
+
+`RolePermissionSeeder` menyertakan langkah migrasi otomatis: bila database masih
+punya user dengan role lama (`super-admin`, `property-manager`, `finance` → jadi
+`admin`; `tenant` → jadi `customer`), seeder memetakan ulang role mereka lalu
+menghapus role lama itu sendiri. Aman dijalankan berkali-kali (`php artisan
+db:seed --class=RolePermissionSeeder`) baik di database baru maupun database yang
+masih memakai skema role lama.
 
 ## Cara kerja penegakan
 
@@ -48,17 +59,17 @@ lewat test otomatis (`tests/Feature/Admin/RolePermissionMatrixTest.php`).
    atas. Controller memanggil `$this->authorize(...)` sebelum melakukan aksi apa pun.
 2. **Halaman 403, bukan redirect diam-diam** — bila `authorize()` gagal, Laravel
    melempar `AuthorizationException` → HTTP 403. Diuji eksplisit di
-   `RolePermissionMatrixTest::test_admin_area_routes_reject_roles_without_the_matching_permission`.
+   `RolePermissionMatrixTest::test_admin_area_routes_reject_customers`.
 3. **Nav yang jujur** — `AdminLayout.vue` memfilter item menu berdasar
    `page.props.auth.permissions` (dikirim lewat `HandleInertiaRequests`), sehingga user
    tidak pernah melihat tautan ke halaman yang akan menolaknya.
 4. **Role baru/berubah** — perubahan role lewat `/admin/users` tercatat ke `audit_logs`
    (aksi `role_changed`) dengan role lama & baru.
 
-## Menambah permission baru (Tahap 2+)
+## Menambah permission baru
 
-Tambahkan entri baru ke `RolePermissionSeeder::PERMISSIONS` dan masukkan ke role yang
-sesuai di `RolePermissionSeeder::ROLES`, lalu jalankan ulang seeder (`syncPermissions`
-bersifat idempotent — aman dijalankan berkali-kali). Jangan mengedit migration
+Tambahkan entri baru ke `RolePermissionSeeder::PERMISSIONS`, lalu jalankan ulang
+seeder (`syncPermissions` bersifat idempotent). `admin` otomatis mendapat permission
+baru lewat wildcard; tidak perlu menyentuh daftar role. Jangan mengedit migration
 `create_permission_tables` yang sudah dipakai; skema tabel `roles`/`permissions` dari
-`spatie/laravel-permission` sudah final untuk seluruh tahap.
+`spatie/laravel-permission` sudah final.

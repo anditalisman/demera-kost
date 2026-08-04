@@ -16,7 +16,7 @@ class AuditLogTest extends TestCase
     {
         $this->seed(RolePermissionSeeder::class);
         $admin = User::factory()->create();
-        $admin->assignRole('super-admin');
+        $admin->assignRole('admin');
 
         $this->actingAs($admin)->post('/admin/content/faqs', [
             'question' => 'Apakah ada biaya admin?',
@@ -46,7 +46,7 @@ class AuditLogTest extends TestCase
     {
         $this->seed(RolePermissionSeeder::class);
         $admin = User::factory()->create();
-        $admin->assignRole('super-admin');
+        $admin->assignRole('admin');
 
         $this->actingAs($admin)->get('/admin/audit-logs')->assertOk();
     }

@@ -20,12 +20,9 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 
 Route::get('/dashboard', function () {
-    $user = auth()->user();
-
-    return match (true) {
-        $user->hasAnyRole(['super-admin', 'admin', 'property-manager', 'finance']) => redirect()->route('admin.dashboard'),
-        default => redirect()->route('customer.dashboard'),
-    };
+    return auth()->user()->hasRole('admin')
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('customer.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

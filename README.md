@@ -30,15 +30,13 @@ Buka `http://localhost` (atau port di `APP_PORT` bila 80 sudah dipakai proses la
 Login dengan kredensial dari `SUPERADMIN_EMAIL`/`SUPERADMIN_PASSWORD` di `.env` — Anda
 akan diminta mengganti password pada login pertama.
 
-Akun demo lain (password: `password`, kecuali super-admin):
+Akun demo lain (password: `password`, kecuali akun admin dari `.env` di atas):
 
 | Email | Role |
 |---|---|
 | `admin@demera.my.id` | admin |
-| `pengelola@demera.my.id` | property-manager |
-| `finance@demera.my.id` | finance |
 | `customer@demera.my.id` | customer |
-| `penyewa1@demera.my.id`, `penyewa2@demera.my.id` | tenant (dengan kontrak aktif contoh) |
+| `penyewa1@demera.my.id`, `penyewa2@demera.my.id` | customer (dengan kontrak sewa aktif contoh) |
 
 Panduan instalasi lengkap (termasuk non-Docker) dan checklist go-live produksi ada di
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
