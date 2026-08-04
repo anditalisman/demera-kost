@@ -2,6 +2,7 @@
 
 namespace App\Domain\Platform\Models;
 
+use App\Domain\Platform\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\Cache;
 #[Fillable(['key', 'value', 'type', 'group', 'label', 'description', 'is_public'])]
 class ApplicationSetting extends Model
 {
+    use Auditable;
+
     public $timestamps = true;
 
     protected function casts(): array

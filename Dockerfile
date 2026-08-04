@@ -88,6 +88,7 @@ COPY --from=frontend /app/public/build ./public/build
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN php artisan storage:link --force || true \
+    && php artisan l5-swagger:generate || true \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 USER www-data

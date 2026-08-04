@@ -2,6 +2,7 @@
 
 namespace App\Domain\Platform\Models;
 
+use App\Domain\Platform\Concerns\Auditable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 #[Fillable(['title', 'category', 'image_path', 'thumbnail_path', 'caption', 'sort_order', 'is_published'])]
 class Gallery extends Model
 {
-    use SoftDeletes;
+    use Auditable, SoftDeletes;
 
     protected $appends = ['image_url', 'thumbnail_url'];
 

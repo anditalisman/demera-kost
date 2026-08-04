@@ -3,10 +3,15 @@
 namespace App\Domain\Platform\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[Fillable([
+    'user_id', 'action', 'auditable_type', 'auditable_id', 'old_values',
+    'new_values', 'ip_address', 'user_agent', 'description',
+])]
 class AuditLog extends Model
 {
     public $timestamps = false;

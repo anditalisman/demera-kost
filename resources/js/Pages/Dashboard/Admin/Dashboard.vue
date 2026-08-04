@@ -13,6 +13,7 @@ const cards = [
     { key: 'content.manage', label: 'FAQ', href: () => route('admin.faqs.index'), desc: 'Kelola pertanyaan yang sering diajukan.' },
     { key: 'settings.view', label: 'Pengaturan', href: () => route('admin.settings.index'), desc: 'Kontak, media sosial, dan SEO default.' },
     { key: 'users.view', label: 'Pengguna', href: () => route('admin.users.index'), desc: 'Kelola akun dan peran (role) pengguna.' },
+    { key: 'audit-logs.view', label: 'Audit Log', href: () => route('admin.audit-logs.index'), desc: 'Riwayat aktivitas penting di seluruh sistem.' },
 ];
 </script>
 

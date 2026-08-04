@@ -3,12 +3,14 @@
 namespace App\Providers;
 
 use App\Domain\Platform\Models\ApplicationSetting;
+use App\Domain\Platform\Models\AuditLog;
 use App\Domain\Platform\Models\ContentPage;
 use App\Domain\Platform\Models\Faq;
 use App\Domain\Platform\Models\Gallery;
 use App\Domain\Platform\Models\Testimonial;
 use App\Models\User;
 use App\Policies\ApplicationSettingPolicy;
+use App\Policies\AuditLogPolicy;
 use App\Policies\ContentPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
@@ -41,5 +43,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Testimonial::class, TestimonialPolicy::class);
         Gate::policy(Faq::class, FaqPolicy::class);
         Gate::policy(ApplicationSetting::class, ApplicationSettingPolicy::class);
+        Gate::policy(AuditLog::class, AuditLogPolicy::class);
     }
 }

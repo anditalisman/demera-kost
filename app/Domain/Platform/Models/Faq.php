@@ -2,6 +2,7 @@
 
 namespace App\Domain\Platform\Models;
 
+use App\Domain\Platform\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['question', 'answer', 'category', 'sort_order', 'is_published'])]
 class Faq extends Model
 {
-    use SoftDeletes;
+    use Auditable, SoftDeletes;
 
     protected function casts(): array
     {

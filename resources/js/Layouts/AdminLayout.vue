@@ -31,6 +31,10 @@ const navItems = computed(() => {
         items.push({ label: 'Pengaturan', href: route('admin.settings.index'), active: route().current('admin.settings.index') });
     }
 
+    if (can('audit-logs.view')) {
+        items.push({ label: 'Audit Log', href: route('admin.audit-logs.index'), active: route().current('admin.audit-logs.index') });
+    }
+
     return items;
 });
 </script>

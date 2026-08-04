@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Domain\Platform\Services\AuditLogger;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -46,7 +47,17 @@ class UserController extends Controller
             'roles.*' => [Rule::in(self::ASSIGNABLE_ROLES)],
         ]);
 
+        $previousRoles = $user->getRoleNames()->all();
+
         $user->syncRoles($validated['roles']);
+
+        AuditLogger::log(
+            'role_changed',
+            $user,
+            old: ['roles' => $previousRoles],
+            new: ['roles' => $validated['roles']],
+            description: "Role {$user->name} diubah oleh ".auth()->user()->name,
+        );
 
         return back()->with('success', "Role untuk {$user->name} berhasil diperbarui.");
     }
@@ -57,7 +68,15 @@ class UserController extends Controller
 
         abort_if($user->id === auth()->id(), 403, 'Tidak dapat menonaktifkan akun sendiri.');
 
-        $user->forceFill(['is_active' => ! $user->is_active])->save();
+        $wasActive = $user->is_active;
+
+        $user->forceFill(['is_active' => ! $wasActive])->save();
+
+        AuditLogger::log(
+            $wasActive ? 'user_deactivated' : 'user_activated',
+            $user,
+            description: "{$user->name} ".($wasActive ? 'dinonaktifkan' : 'diaktifkan')." oleh ".auth()->user()->name,
+        );
 
         return back()->with('success', $user->is_active ? "{$user->name} diaktifkan kembali." : "{$user->name} dinonaktifkan.");
     }

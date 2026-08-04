@@ -9,9 +9,30 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use OpenApi\Attributes as OA;
 
 class FashionSubscriberController extends Controller
 {
+    #[OA\Post(
+        path: '/fashion/subscribe',
+        summary: 'Register for the Demera Fashion launch notification',
+        description: 'Requires at least one of email or whatsapp_number. Rate limited to 5 requests/minute per IP.',
+        tags: ['Fashion'],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'name', type: 'string', nullable: true, example: 'Dinda'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', nullable: true),
+                    new OA\Property(property: 'whatsapp_number', type: 'string', nullable: true, example: '081234567890'),
+                ],
+            ),
+        ),
+        responses: [
+            new OA\Response(response: 201, description: 'Subscribed successfully'),
+            new OA\Response(response: 422, description: 'Validation error (missing contact method or duplicate)'),
+        ],
+    )]
     public function store(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([

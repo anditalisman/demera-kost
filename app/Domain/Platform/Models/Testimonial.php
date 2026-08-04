@@ -3,6 +3,7 @@
 namespace App\Domain\Platform\Models;
 
 use App\Domain\Living\Models\Tenant;
+use App\Domain\Platform\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 ])]
 class Testimonial extends Model
 {
-    use SoftDeletes;
+    use Auditable, SoftDeletes;
 
     protected $appends = ['author_photo_url'];
 

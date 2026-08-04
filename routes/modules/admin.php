@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ApplicationSettingController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GalleryController;
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.roles.update');
     Route::put('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {
