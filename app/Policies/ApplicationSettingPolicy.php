@@ -17,7 +17,7 @@ class ApplicationSettingPolicy
         return $this->viewAny($user);
     }
 
-    public function update(User $user, ApplicationSetting $setting): bool
+    public function update(User $user, ?ApplicationSetting $setting = null): bool
     {
         return $user->can('settings.manage');
     }

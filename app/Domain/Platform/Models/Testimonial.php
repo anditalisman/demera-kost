@@ -4,9 +4,11 @@ namespace App\Domain\Platform\Models;
 
 use App\Domain\Living\Models\Tenant;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'author_name', 'author_role', 'author_photo_path', 'rating', 'content',
@@ -16,6 +18,8 @@ class Testimonial extends Model
 {
     use SoftDeletes;
 
+    protected $appends = ['author_photo_url'];
+
     protected function casts(): array
     {
         return [
@@ -24,6 +28,11 @@ class Testimonial extends Model
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    protected function authorPhotoUrl(): Attribute
+    {
+        return Attribute::get(fn () => $this->author_photo_path ? Storage::disk('public_media')->url($this->author_photo_path) : null);
     }
 
     public function scopePublished($query)
