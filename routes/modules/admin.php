@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ContentPageController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\TestimonialController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -42,6 +43,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     Route::get('/settings', [ApplicationSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [ApplicationSettingController::class, 'update'])->name('settings.update');
+
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.roles.update');
+    Route::put('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {

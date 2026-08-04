@@ -12,6 +12,7 @@ const cards = [
     { key: 'content.manage', label: 'Testimoni', href: () => route('admin.testimonials.index'), desc: 'Kelola testimoni penghuni yang tampil di beranda.' },
     { key: 'content.manage', label: 'FAQ', href: () => route('admin.faqs.index'), desc: 'Kelola pertanyaan yang sering diajukan.' },
     { key: 'settings.view', label: 'Pengaturan', href: () => route('admin.settings.index'), desc: 'Kontak, media sosial, dan SEO default.' },
+    { key: 'users.view', label: 'Pengguna', href: () => route('admin.users.index'), desc: 'Kelola akun dan peran (role) pengguna.' },
 ];
 </script>
 
