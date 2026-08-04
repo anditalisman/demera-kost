@@ -156,6 +156,11 @@ networks:
     ipam:
       config:
         - subnet: 10.20.30.0/24
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.31.0/24
 
 volumes:
   mysql_data:
