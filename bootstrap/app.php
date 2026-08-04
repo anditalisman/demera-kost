@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,4 +32,23 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Branded 404/500 pages instead of the default Laravel/Symfony error
+        // page — but only outside local/testing, so the debug page still
+        // shows during development.
+        $exceptions->respond(function (Response $response, \Throwable $exception, Request $request) {
+            $status = $response->getStatusCode();
+
+            if (
+                ! $request->is('api/*')
+                && ! app()->environment(['local', 'testing'])
+                && in_array($status, [404, 403, 419, 500, 503], true)
+            ) {
+                return Inertia::render('Error', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            return $response;
+        });
     })->create();
