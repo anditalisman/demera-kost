@@ -1,0 +1,9 @@
+# Non-Docker scheduler for Demera — the standard Laravel approach: a single
+# cron entry that fires every minute, and Laravel's internal scheduler
+# (config/console or routes/console.php) decides what actually needs to run.
+#
+# Install: crontab -u www-data -e   (paste the line below), or copy this
+# file to /etc/cron.d/demera-scheduler (cron.d format requires the "www-data"
+# user column, already included below).
+
+* * * * * www-data cd /var/www/demera && php artisan schedule:run >> /var/log/demera/scheduler.log 2>&1
