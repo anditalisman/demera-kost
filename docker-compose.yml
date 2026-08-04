@@ -153,6 +153,9 @@ services:
 networks:
   demera:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.30.0/24
 
 volumes:
   mysql_data:
