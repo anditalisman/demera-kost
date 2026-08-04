@@ -60,6 +60,38 @@ return [
             'report' => false,
         ],
 
+        // S3-compatible object storage (MinIO in dev, real AWS S3 in prod).
+        // Public bucket: room photos, galleries, testimonials, hero images — served
+        // directly, cacheable. Never put identity documents or contracts here.
+        'public_media' => [
+            'driver' => 's3',
+            'key' => env('OBJECT_STORAGE_KEY'),
+            'secret' => env('OBJECT_STORAGE_SECRET'),
+            'region' => env('OBJECT_STORAGE_REGION', 'us-east-1'),
+            'bucket' => env('OBJECT_STORAGE_BUCKET_PUBLIC', 'demera-public'),
+            'url' => env('OBJECT_STORAGE_ENDPOINT_PUBLIC_URL').'/'.env('OBJECT_STORAGE_BUCKET_PUBLIC', 'demera-public'),
+            'endpoint' => env('OBJECT_STORAGE_ENDPOINT'),
+            'use_path_style_endpoint' => env('OBJECT_STORAGE_USE_PATH_STYLE', true),
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        // Private bucket: identity documents, signed contracts, payment proofs.
+        // Never publicly readable — always accessed through short-lived signed URLs.
+        'private_documents' => [
+            'driver' => 's3',
+            'key' => env('OBJECT_STORAGE_KEY'),
+            'secret' => env('OBJECT_STORAGE_SECRET'),
+            'region' => env('OBJECT_STORAGE_REGION', 'us-east-1'),
+            'bucket' => env('OBJECT_STORAGE_BUCKET_PRIVATE', 'demera-private'),
+            'endpoint' => env('OBJECT_STORAGE_ENDPOINT'),
+            'use_path_style_endpoint' => env('OBJECT_STORAGE_USE_PATH_STYLE', true),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*
