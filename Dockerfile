@@ -60,8 +60,18 @@ WORKDIR /var/www/html
 ##########################
 FROM php-base AS dev
 
-RUN apk add --no-cache bash git
+ARG UID=1000
+ARG GID=1000
+
+RUN apk add --no-cache bash git \
+    && deluser www-data 2>/dev/null || true \
+    && delgroup www-data 2>/dev/null || true \
+    && addgroup -g ${GID} www-data \
+    && adduser -D -u ${UID} -G www-data -s /bin/bash www-data
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+USER www-data
 
 CMD ["php-fpm"]
 
