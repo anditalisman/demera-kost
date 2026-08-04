@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Living\BookingController;
+use App\Http\Controllers\Living\InvoiceController;
 use App\Http\Controllers\Living\LivingController;
+use App\Http\Controllers\Living\PaymentController;
 use App\Http\Controllers\Living\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,4 +29,12 @@ Route::prefix('living')->name('living.')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{code}', [BookingController::class, 'show'])->name('bookings.show');
+
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.pdf');
+
+    Route::get('/invoices/{invoice}/pay', [PaymentController::class, 'create'])->name('payments.create');
+    Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
 });

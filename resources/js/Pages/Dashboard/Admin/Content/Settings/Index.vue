@@ -13,13 +13,19 @@ interface SettingField {
     value: string;
 }
 
-const props = defineProps<{ groups: Record<string, SettingField[]> }>();
+const props = defineProps<{ groups: Record<string, SettingField[]>; qrisImageUrl: string | null }>();
+
+const qrisForm = useForm({ image: null as File | null });
+function submitQris() {
+    qrisForm.post(route('admin.settings.qris.upload'), { forceFormData: true, onSuccess: () => (qrisForm.image = null) });
+}
 
 const GROUP_LABELS: Record<string, string> = {
     contact: 'Kontak & Lokasi',
     social: 'Media Sosial',
     seo: 'SEO',
     booking: 'Pemesanan',
+    payment: 'Pembayaran',
 };
 
 const initialValues: Record<string, string> = {};
@@ -57,5 +63,21 @@ function submit() {
 
             <PrimaryButton :disabled="form.processing">Simpan Pengaturan</PrimaryButton>
         </form>
+
+        <div class="mt-8 rounded-2xl border border-beige-200 bg-white p-6 shadow-soft">
+            <h2 class="font-display text-lg font-semibold text-charcoal-800">Gambar QRIS</h2>
+            <p class="mt-1 text-sm text-charcoal-400">Diunggah admin — pelanggan memindai kode ini lalu mengunggah bukti pembayaran.</p>
+
+            <div class="mt-4 flex items-center gap-6">
+                <div class="h-40 w-40 shrink-0 overflow-hidden rounded-lg border border-beige-200 bg-cream-50">
+                    <img v-if="qrisImageUrl" :src="qrisImageUrl" class="h-full w-full object-contain" />
+                    <p v-else class="flex h-full items-center justify-center text-center text-xs text-charcoal-400">Belum ada gambar QRIS</p>
+                </div>
+                <form class="flex flex-col gap-3" @submit.prevent="submitQris">
+                    <input type="file" accept="image/*" class="text-sm" @change="qrisForm.image = ($event.target as HTMLInputElement).files?.[0] ?? null" />
+                    <PrimaryButton :disabled="qrisForm.processing || !qrisForm.image" class="w-fit">Unggah Gambar QRIS</PrimaryButton>
+                </form>
+            </div>
+        </div>
     </AdminLayout>
 </template>

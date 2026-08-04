@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Domain\Platform\Models\ApplicationSetting;
+use App\Domain\Platform\Services\ImageUploadService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,13 +39,24 @@ class ApplicationSettingController extends Controller
         'booking' => [
             'booking_hold_hours' => ['label' => 'Batas Waktu Pembayaran Booking (jam)', 'type' => 'number'],
         ],
+        'payment' => [
+            'booking_admin_fee' => ['label' => 'Biaya Admin Booking (Rp)', 'type' => 'number'],
+            'payment_bank_name' => ['label' => 'Nama Bank', 'type' => 'string'],
+            'payment_bank_account_number' => ['label' => 'Nomor Rekening', 'type' => 'string'],
+            'payment_bank_account_holder' => ['label' => 'Nama Pemilik Rekening', 'type' => 'string'],
+            'invoice_late_fee_type' => ['label' => 'Tipe Denda Keterlambatan (flat/percentage)', 'type' => 'string'],
+            'invoice_late_fee_amount' => ['label' => 'Nilai Denda Keterlambatan', 'type' => 'number'],
+        ],
     ];
+
+    public function __construct(private readonly ImageUploadService $imageUploadService) {}
 
     public function index(): Response
     {
         $this->authorize('viewAny', ApplicationSetting::class);
 
         $existing = ApplicationSetting::query()->pluck('value', 'key');
+        $qrisPath = $existing->get('payment_qris_image');
 
         $groups = collect(self::DEFINITIONS)->map(function (array $fields, string $group) use ($existing) {
             return collect($fields)->map(function (array $meta, string $key) use ($existing, $group) {
@@ -59,6 +72,7 @@ class ApplicationSettingController extends Controller
 
         return Inertia::render('Dashboard/Admin/Content/Settings/Index', [
             'groups' => $groups,
+            'qrisImageUrl' => $qrisPath ? Storage::disk('public_media')->url($qrisPath) : null,
         ]);
     }
 
@@ -81,7 +95,7 @@ class ApplicationSettingController extends Controller
             $groupName = collect(self::DEFINITIONS)->search(fn ($fields) => array_key_exists($key, $fields));
 
             ApplicationSetting::set($key, $value, [
-                'type' => 'string',
+                'type' => self::DEFINITIONS[$groupName][$key]['type'] ?? 'string',
                 'group' => $groupName ?: 'general',
                 'label' => self::DEFINITIONS[$groupName][$key]['label'] ?? $key,
                 'is_public' => true,
@@ -91,5 +105,31 @@ class ApplicationSettingController extends Controller
         Cache::forget('public_settings');
 
         return back()->with('success', 'Pengaturan berhasil disimpan.');
+    }
+
+    public function uploadQris(Request $request): RedirectResponse
+    {
+        $this->authorize('update', ApplicationSetting::class);
+
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'max:4096'],
+        ]);
+
+        $oldPath = ApplicationSetting::get('payment_qris_image');
+
+        $uploaded = $this->imageUploadService->upload($request->file('image'), 'qris');
+
+        ApplicationSetting::set('payment_qris_image', $uploaded['path'], [
+            'type' => 'string',
+            'group' => 'payment',
+            'label' => 'Gambar QRIS',
+            'is_public' => false,
+        ]);
+
+        if ($oldPath) {
+            $this->imageUploadService->delete($oldPath);
+        }
+
+        return back()->with('success', 'Gambar QRIS berhasil diperbarui.');
     }
 }

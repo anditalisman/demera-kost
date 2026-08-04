@@ -6,6 +6,8 @@ use App\Domain\Living\Models\Booking;
 use App\Domain\Living\Models\Building;
 use App\Domain\Living\Models\Facility;
 use App\Domain\Living\Models\Floor;
+use App\Domain\Living\Models\Invoice;
+use App\Domain\Living\Models\Payment;
 use App\Domain\Living\Models\Property;
 use App\Domain\Living\Models\Room;
 use App\Domain\Living\Models\RoomType;
@@ -22,6 +24,8 @@ use App\Policies\ContentPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
 use App\Policies\BookingPolicy;
+use App\Policies\InvoicePolicy;
+use App\Policies\PaymentPolicy;
 use App\Policies\RoomManagementPolicy;
 use App\Policies\TestimonialPolicy;
 use App\Policies\UserPolicy;
@@ -61,5 +65,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Room::class, RoomManagementPolicy::class);
         Gate::policy(Facility::class, RoomManagementPolicy::class);
         Gate::policy(Booking::class, BookingPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
     }
 }

@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FloorController;
 use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PropertyController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\RoomTypeController;
@@ -50,6 +52,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     Route::get('/settings', [ApplicationSettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [ApplicationSettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/qris', [ApplicationSettingController::class, 'uploadQris'])->name('settings.qris.upload');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::put('/users/{user}/roles', [UserController::class, 'updateRoles'])->name('users.roles.update');
@@ -93,6 +96,15 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::put('/rooms/{room}/photos/reorder', [RoomController::class, 'reorderPhotos'])->name('rooms.photos.reorder');
     Route::put('/rooms/{room}/photos/{roomImage}/primary', [RoomController::class, 'setPrimaryPhoto'])->name('rooms.photos.primary');
     Route::delete('/rooms/{room}/photos/{roomImage}', [RoomController::class, 'destroyPhoto'])->name('rooms.photos.destroy');
+
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.pdf');
+
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/{payment}/proof', [PaymentController::class, 'proof'])->name('payments.proof');
+    Route::put('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
+    Route::put('/payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {

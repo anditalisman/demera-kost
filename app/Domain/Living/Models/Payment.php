@@ -13,8 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
-    'invoice_id', 'method', 'amount', 'status', 'gateway_provider', 'gateway_transaction_id',
-    'va_number', 'qris_payload', 'proof_file_path', 'notes', 'idempotency_key',
+    'payment_code', 'invoice_id', 'method', 'amount', 'status', 'gateway_provider', 'gateway_transaction_id',
+    'va_number', 'qris_payload', 'proof_file_path', 'paid_at', 'expired_at', 'verified_by', 'verified_at',
+    'notes', 'idempotency_key',
 ])]
 class Payment extends Model
 {

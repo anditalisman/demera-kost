@@ -23,6 +23,13 @@ const page = usePage<PageProps>();
                         Dashboard
                     </Link>
                     <Link
+                        :href="route('invoices.index')"
+                        class="text-sm font-medium"
+                        :class="route().current('invoices.*') || route().current('payments.*') ? 'text-terracotta-600' : 'text-charcoal-500 hover:text-terracotta-600'"
+                    >
+                        Tagihan Saya
+                    </Link>
+                    <Link
                         :href="route('profile.edit')"
                         class="text-sm font-medium"
                         :class="route().current('profile.edit') ? 'text-terracotta-600' : 'text-charcoal-500 hover:text-terracotta-600'"

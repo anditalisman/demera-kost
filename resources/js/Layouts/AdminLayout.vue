@@ -32,6 +32,14 @@ const navItems = computed(() => {
         );
     }
 
+    if (route().has('admin.invoices.index') && (can('invoices.view') || can('invoices.manage'))) {
+        items.push({ label: 'Invoice', href: route('admin.invoices.index'), active: route().current('admin.invoices.*') });
+    }
+
+    if (route().has('admin.payments.index') && (can('payments.view') || can('payments.verify') || can('payments.manage'))) {
+        items.push({ label: 'Pembayaran', href: route('admin.payments.index'), active: route().current('admin.payments.*') });
+    }
+
     if (route().has('admin.users.index') && (can('users.view') || can('users.manage'))) {
         items.push({ label: 'Pengguna', href: route('admin.users.index'), active: route().current('admin.users.index') });
     }

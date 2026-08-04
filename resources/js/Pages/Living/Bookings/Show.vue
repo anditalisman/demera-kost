@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { formatIdr } from '@/lib/roomStatus';
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -109,8 +110,10 @@ const STATUS_CLASS: Record<string, string> = {
                 </div>
 
                 <div v-if="booking.status === 'awaiting_payment' && booking.payment_due_at" class="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
-                    Selesaikan pembayaran sebelum <strong>{{ booking.payment_due_at }}</strong>, atau kamar akan dilepas
-                    kembali secara otomatis. Fitur unggah bukti pembayaran tersedia di halaman ini setelah dirilis.
+                    <p>Selesaikan pembayaran sebelum <strong>{{ booking.payment_due_at }}</strong>, atau kamar akan dilepas kembali secara otomatis.</p>
+                    <Link v-if="booking.invoices[0]" :href="route('payments.create', booking.invoices[0].id)">
+                        <PrimaryButton class="mt-3">Bayar Sekarang</PrimaryButton>
+                    </Link>
                 </div>
 
                 <div class="mt-6 border-t border-beige-100 pt-6">
