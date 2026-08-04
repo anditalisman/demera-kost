@@ -6,7 +6,7 @@
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --no-scripts --no-progress --prefer-dist --optimize-autoloader
+RUN composer install --no-dev --no-interaction --no-scripts --no-progress --prefer-dist --optimize-autoloader --ignore-platform-reqs
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
@@ -18,6 +18,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
+COPY --from=vendor /app/vendor/tightenco/ziggy ./vendor/tightenco/ziggy
 RUN npm run build
 
 ##########################
@@ -94,3 +95,11 @@ RUN php artisan storage:link --force || true \
 USER www-data
 
 CMD ["php-fpm"]
+
+##########################
+# Stage: nginx (static assets baked in, used by docker-compose in production)
+##########################
+FROM nginx:1.27-alpine AS nginx-prod
+
+COPY --from=production /var/www/html/public /var/www/html/public
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
