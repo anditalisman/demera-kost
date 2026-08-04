@@ -54,9 +54,17 @@ masih memakai skema role lama.
 
 ## Cara kerja penegakan
 
-1. **Policy** — setiap resource admin (ContentPage, Gallery, Testimonial, Faq,
-   ApplicationSetting, User, AuditLog) punya Policy class yang memeriksa permission di
-   atas. Controller memanggil `$this->authorize(...)` sebelum melakukan aksi apa pun.
+1. **Policy** — setiap resource admin punya Policy class yang memeriksa permission di
+   atas: `ContentPage`, `Gallery`, `Testimonial`, `Faq`, `ApplicationSetting`, `User`,
+   `AuditLog` (Tahap 1), `RoomManagementPolicy` (dipakai bersama oleh `Property`,
+   `Building`, `Floor`, `RoomType`, `Room`, `Facility` — satu class karena aturannya
+   identik), `BookingPolicy`, `InvoicePolicy`, `PaymentPolicy`, `TenantPolicy`,
+   `LeasePolicy`, `MaintenanceRequestPolicy` (Tahap 2–5; beberapa di antaranya, seperti
+   `BookingPolicy::view`, juga mengizinkan pemilik resource sendiri — bukan hanya
+   admin — melihat booking/invoice/pembayaran/keluhan miliknya). Controller memanggil
+   `$this->authorize(...)` sebelum melakukan aksi apa pun. Laporan (`/admin/reports`)
+   dan dashboard admin tidak terikat ke satu Eloquent model, jadi diperiksa langsung
+   lewat `$user->can('reports.view')`/`hasRole('admin')`, bukan lewat Policy class.
 2. **Halaman 403, bukan redirect diam-diam** — bila `authorize()` gagal, Laravel
    melempar `AuthorizationException` → HTTP 403. Diuji eksplisit di
    `RolePermissionMatrixTest::test_admin_area_routes_reject_customers`.

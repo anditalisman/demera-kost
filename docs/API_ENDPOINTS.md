@@ -60,9 +60,15 @@ mengembalikan JSON (`201`) vs redirect Inertia biasa.
 
 `GET /api/user` — mengembalikan user yang sedang login lewat Sanctum personal access
 token (`Authorization: Bearer {token}`). Endpoint publik Living/Fashion di atas **tidak**
-memerlukan autentikasi. Endpoint API bergerbang permission (booking, invoice, dsb.) belum
-ada di Tahap 1 — akan ditambahkan seiring fitur backend-nya (Tahap 3+), memakai token
-Sanctum yang sama.
+memerlukan autentikasi.
+
+Booking, tagihan, pembayaran, penyewa/kontrak, dan laporan (Tahap 3–7) sengaja **tidak**
+diekspos lewat `/api/v1/*` — semuanya dilayani sebagai halaman Inertia biasa (lihat
+`docs/SITEMAP.md`), konsisten dengan keputusan arsitektur monolith di
+`docs/ARSITEKTUR.md`. Bila klien eksternal/mobile butuh akses ke fitur-fitur itu di
+masa depan, tambahkan controller baru di `app/Http/Controllers/Api/` yang memakai
+service domain yang sama (`BookingLifecycleService`, `PaymentVerificationService`, dst.)
+alih-alih menduplikasi logikanya — token Sanctum yang sama sudah siap dipakai.
 
 ## Menambah endpoint API baru
 

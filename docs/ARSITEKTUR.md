@@ -43,6 +43,25 @@ Tiga domain bisnis dipisah lewat namespace `App\Domain\{Platform,Living,Fashion}
 
 Tidak ada foreign key silang antara tabel Living dan tabel Fashion.
 
+## Layanan Domain (Living)
+
+Logika bisnis bertahap/transaksional hidup di `app/Domain/Living/Services/`, dipanggil
+dari controller lewat dependency injection — controller tetap tipis (validasi + panggil
+service + render/redirect):
+
+| Service | Tanggung jawab |
+|---|---|
+| `BookingLifecycleService` | `createHold()` (row-locked, mencegah double-booking), `expire()`, `confirm()` (booking → Tenant + Lease + Deposit) |
+| `PaymentVerificationService` | `submitProof()`, `verify()` (memicu `confirm()` bila invoice lunas), `reject()` |
+| `InvoiceService` | `generateMonthlyInvoice()` (idempotent, prorata otomatis), `markOverdue()` (denda, idempotent) |
+| `LeaseManagementService` | `extend()`, `transferRoom()`, `terminate()` |
+| `ReportService` | Menghasilkan seluruh 10 laporan admin sebagai struktur `{headings, rows}` seragam |
+
+Operasi yang mengubah status kamar/booking/lease dan menyentuh lebih dari satu tabel
+selalu dibungkus `DB::transaction()` dengan `lockForUpdate()` pada baris yang diperebutkan
+(kamar, booking, lease) — pola ini mencegah race condition seperti dua pelanggan memesan
+kamar yang sama secara bersamaan.
+
 ## Alur Request (halaman web)
 
 ```
@@ -105,24 +124,41 @@ tanpa registrasi manual. Perubahan role dan aktivasi/nonaktivasi user dicatat ma
 `UserController` (sengaja tidak lewat trait otomatis, supaya hash password User tidak
 pernah ikut tersimpan di kolom `old_values`/`new_values`).
 
-## Notifikasi (fondasi untuk Tahap 6)
+## Notifikasi
 
-Skema `notification_templates`, `notifications`, `notification_logs` sudah lengkap di
-Tahap 1, termasuk 11 template siap pakai (pengingat H-7 s.d. H+7, kontrak akan berakhir,
-konfirmasi booking, verifikasi pembayaran). Pengiriman sungguhan (WhatsApp/email) belum
-diaktifkan — `WHATSAPP_PROVIDER=log` di Tahap 1 berarti pesan hanya ditulis ke log, bukan
-dikirim. Ini murni keputusan cakupan Tahap 1, bukan keterbatasan desain: provider asli
-tinggal diplug lewat `WHATSAPP_PROVIDER` env var dan sebuah implementasi baru dari
-kontrak provider (belum dibuat — akan hadir di Tahap 6).
+`App\Domain\Platform\Services\NotificationDispatcher::dispatch()` adalah satu-satunya
+jalur pengiriman notifikasi. Setiap panggilan selalu menulis sebuah `Notification`
+in-app (channel always-on, muncul di lonceng notifikasi kedua layout) plus
+`NotificationLog`-nya; bila `NotificationTemplate` yang dipakai menargetkan channel
+`whatsapp`/`email`, driver terkait (`LogWhatsAppDriver`/`LogEmailDriver`, implementasi
+`NotificationChannelDriver`) juga menulis log pengirimannya sendiri. Kedua driver itu
+adalah *placeholder* yang disengaja — `WHATSAPP_PROVIDER=log` berarti pesan dicatat
+penuh ke `notification_logs` (termasuk alasan "belum ada provider asli dikonfigurasi")
+tapi tidak benar-benar terkirim. Mengganti ke provider sungguhan berarti membuat
+implementasi `NotificationChannelDriver` baru dan mengubah binding di
+`NotificationDispatcher`'s constructor — tidak ada kode pemanggil (`BookingLifecycleService`,
+`PaymentVerificationService`, `SendDueReminders` command) yang perlu berubah.
 
-## Pembayaran (fondasi untuk Tahap 4)
+11 `NotificationTemplate` diseed di Tahap 1 dan seluruhnya sudah dipakai: konfirmasi
+booking (`booking_confirmed`/`_wa`), verifikasi pembayaran (`payment_verified`),
+pengingat tagihan H-7 s.d. H+7, dan kontrak akan berakhir. `SendDueReminders` (harian)
+dan `RetryFailedNotifications` (tiap jam) adalah scheduled command yang memicu
+pengiriman berkala.
 
-Skema (`invoices`, `invoice_items`, `payments`, `payment_webhooks`, `refunds`, `deposits`)
-sudah lengkap dengan `idempotency_key` unik pada `payments` dan tabel `payment_webhooks`
-terpisah untuk audit trail webhook mentah. `PAYMENT_GATEWAY_PROVIDER=manual` di Tahap 1
-berarti hanya alur transfer manual + QRIS (gambar diunggah admin) + verifikasi admin
-yang aktif; integrasi Midtrans/
-Xendit menyusul di Tahap 4 lewat abstraction layer yang sama.
+## Pembayaran
+
+Hanya dua metode aktif, keduanya manual, sesuai keputusan eksplisit user: **transfer
+bank** (customer unggah bukti) dan **QRIS statis** (gambar diunggah admin lewat halaman
+Pengaturan, customer memindai lalu tetap mengunggah bukti — diverifikasi dengan cara
+yang sama seperti transfer bank). `PaymentVerificationService` menangani submit bukti
+dan verifikasi/penolakan oleh admin; tidak ada payment gateway atau webhook yang
+diintegrasikan. Kolom skema untuk gateway (`gateway_provider`, `gateway_transaction_id`,
+`va_number`, tabel `payment_webhooks`) tetap ada di migration dari Tahap 1 tapi sengaja
+tidak dipakai — bila suatu saat integrasi Midtrans/Xendit dibutuhkan, kolom itu sudah
+siap tanpa migration tambahan.
+
+`idempotency_key` unik pada `payments` tetap dipertahankan meski tanpa webhook, karena
+berguna juga untuk mencegah duplikasi submit bukti dari sisi client.
 
 ## Docker vs Non-Docker
 

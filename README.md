@@ -4,9 +4,10 @@ Platform dua lini bisnis Demera: **Demera Living** (katalog, pemesanan, dan peng
 kamar kost) dan **Demera Fashion** (fashion editorial — halaman "Segera Hadir" di tahap
 ini). Domain produksi: `https://demera.my.id`.
 
-**Status**: Tahap 1 (Fondasi) selesai dan production-ready untuk cakupannya. Lihat
-[`docs/ROADMAP.md`](docs/ROADMAP.md) untuk apa yang sudah ada vs. yang menyusul di
-Tahap 2–7.
+**Status**: Tahap 1–7 selesai — katalog kamar, pemesanan, tagihan & pembayaran manual/
+QRIS, penyewa & kontrak, notifikasi, dan dashboard/laporan admin sudah aktif penuh.
+Lihat [`docs/ROADMAP.md`](docs/ROADMAP.md) untuk detail per tahap dan yang sengaja di
+luar cakupan (Demera Fashion penuh, payment gateway pihak ketiga).
 
 ## Stack
 
@@ -36,7 +37,7 @@ Akun demo lain (password: `password`, kecuali akun admin dari `.env` di atas):
 |---|---|
 | `admin@demera.my.id` | admin |
 | `customer@demera.my.id` | customer |
-| `penyewa1@demera.my.id`, `penyewa2@demera.my.id` | customer (dengan kontrak sewa aktif contoh) |
+| `penyewa1@demera.my.id`, `penyewa2@demera.my.id` | customer (dengan kontrak sewa aktif, tagihan, dan riwayat pembayaran contoh) |
 
 Panduan instalasi lengkap (termasuk non-Docker) dan checklist go-live produksi ada di
 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
@@ -55,10 +56,10 @@ docker compose exec app vendor/bin/phpunit
 | [`docs/ERD.md`](docs/ERD.md) | Entity Relationship Diagram (seluruh 35 tabel) |
 | [`docs/SITEMAP.md`](docs/SITEMAP.md) | Peta seluruh halaman & endpoint |
 | [`docs/ALUR_PENGGUNA.md`](docs/ALUR_PENGGUNA.md) | Diagram alur pengguna utama |
-| [`docs/ROLE_PERMISSION.md`](docs/ROLE_PERMISSION.md) | 6 role & matriks permission |
+| [`docs/ROLE_PERMISSION.md`](docs/ROLE_PERMISSION.md) | 2 role (admin/customer) & matriks permission |
 | [`docs/API_ENDPOINTS.md`](docs/API_ENDPOINTS.md) | Endpoint JSON API v1 publik |
 | [`docs/STRUKTUR_FOLDER.md`](docs/STRUKTUR_FOLDER.md) | Struktur folder & alasan desainnya |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Status Tahap 1 + rencana Tahap 2–7 |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Status Tahap 1–7 (selesai) dan yang sengaja di luar cakupan |
 | [`docs/KONFIGURASI.md`](docs/KONFIGURASI.md) | Konfigurasi MySQL/Redis/MinIO/Mail/WhatsApp/Payment Gateway |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Deployment Docker & non-Docker, backup/restore, checklist go-live |
 | [`docs/PANDUAN_ADMIN.md`](docs/PANDUAN_ADMIN.md) | Panduan penggunaan untuk staf admin |

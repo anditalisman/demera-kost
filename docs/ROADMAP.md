@@ -1,111 +1,114 @@
 # Roadmap Implementasi Demera
 
-Status per dokumen ini: **Tahap 1 selesai dan production-ready untuk cakupannya.**
-Tahap 2–7 belum dikerjakan — deskripsi di bawah adalah rencana untuk sesi pengembangan
-selanjutnya, disalin & disesuaikan dari spesifikasi awal proyek.
+Status per dokumen ini: **Tahap 1–7 selesai.** Seluruh cakupan Demera Living (katalog,
+booking, tagihan & pembayaran manual/QRIS, penyewa & kontrak, notifikasi, dashboard &
+laporan) sudah dibangun, diuji (PHPUnit + verifikasi manual end-to-end lewat sesi
+sungguhan), dan di-commit per klaster. Demera Fashion tetap sengaja minim ("Segera
+Hadir") sesuai keputusan awal — pengembangan katalog/keranjang/checkout Fashion penuh
+ada di luar cakupan roadmap ini.
 
-## ✅ Tahap 1 — Fondasi (selesai)
+## ✅ Tahap 1 — Fondasi
 
-- [x] Setup Laravel 13 + Inertia + Vue 3 (TypeScript) + Tailwind, Docker Compose penuh
-      (nginx, php-fpm, mysql8, redis, minio, queue worker, scheduler)
-- [x] Struktur modular `App\Domain\{Platform,Living,Fashion}`
-- [x] Skema database penuh — 35 tabel, seluruh migration untuk semua tahap sekaligus
-      (lihat `docs/ERD.md`), supaya tahap berikutnya tidak perlu migration yang mengubah
-      kontrak data yang sudah dipakai
-- [x] Autentikasi: registrasi (nama/email/WhatsApp/password), login email-atau-WhatsApp,
-      verifikasi email, lupa/reset password, logout semua perangkat, rate limiting, wajib
-      ganti password pertama kali untuk akun seed
-- [x] RBAC: 6 role, matriks permission, Policy per resource, nav yang sadar permission
-- [x] Object storage: MinIO/S3, disk publik vs privat, signed URL, kompresi gambar +
-      thumbnail otomatis
-- [x] CMS: hero banner, info bisnis, galeri (+drag reorder), testimoni, FAQ, pengaturan
-      (kontak/sosial/SEO) — semua tanpa perlu ubah kode
-- [x] Landing page penuh, CMS-driven
-- [x] Demera Fashion "Segera Hadir" + form notifikasi peluncuran
-- [x] Demera Living publik: hub, katalog kamar (baca saja), detail kamar, galeri,
-      fasilitas, lokasi, FAQ, kontak
-- [x] Dashboard admin (shell) + manajemen pengguna/role
-- [x] Audit log otomatis (perubahan CMS + event auth) + viewer admin
-- [x] Dokumentasi OpenAPI/Swagger untuk API publik v1
-- [x] Data awal: seeder lengkap (role, akun admin, staf demo, 1 properti, 12 kamar
-      dengan 6 status berbeda, fasilitas, foto placeholder, penyewa contoh, booking
-      contoh, invoice & pembayaran contoh, template notifikasi, FAQ, testimoni)
-- [x] 75 automated test (PHPUnit) mencakup auth, RBAC, CRUD CMS, halaman publik, seeder
-- [x] Dokumentasi: arsitektur, ERD, sitemap, alur pengguna, role & permission, endpoint
-      API, struktur folder, panduan deployment Docker & non-Docker
+- Setup Laravel 13 + Inertia + Vue 3 (TypeScript) + Tailwind, Docker Compose penuh
+  (nginx, php-fpm, mysql8, redis, minio, queue worker, scheduler)
+- Struktur modular `App\Domain\{Platform,Living,Fashion}`
+- Skema database penuh — 36 tabel (35 + `maintenance_comments` yang ditambahkan di
+  Tahap 5), lihat `docs/ERD.md`
+- Autentikasi: registrasi, login email-atau-WhatsApp, verifikasi email, lupa/reset
+  password, logout semua perangkat, rate limiting, wajib ganti password pertama untuk
+  akun seed
+- Object storage: MinIO/S3, disk publik vs privat, signed URL, kompresi gambar +
+  thumbnail otomatis
+- CMS: hero banner, info bisnis, galeri, testimoni, FAQ, pengaturan
+- Landing page penuh, CMS-driven; Demera Fashion "Segera Hadir"
+- Dashboard admin (shell) + manajemen pengguna/role
+- Audit log otomatis + viewer admin
+- Dokumentasi OpenAPI/Swagger untuk API publik v1
 
-### Sengaja tidak dikerjakan di Tahap 1
+## ✅ Tahap 2 — Katalog Demera Living
 
-Fitur berikut punya skema database yang sudah lengkap (lihat `docs/ERD.md`) tapi belum
-ada UI/logika bisnisnya — ini keputusan cakupan, bukan bagian yang terlewat:
+- Panel admin: Struktur Properti (properti/gedung/lantai bersarang), Tipe Kamar,
+  Fasilitas, dan Kamar (form lengkap + galeri foto drag-reorder + foto utama + assign
+  fasilitas + ubah status manual/massal + riwayat status)
+- Filter & pencarian publik di `/living/rooms`: status, rentang harga, tipe kamar,
+  lantai, kapasitas, fasilitas; urutan terbaru/harga terendah/tertinggi
 
-- Katalog kamar dengan filter/sort/search dan panel admin CRUD kamar → **Tahap 2**
-- Proses booking, penahanan kamar, pencegahan double-booking, upload dokumen identitas
-  → **Tahap 3**
-- Invoice, payment gateway, webhook, kuitansi PDF, tagihan berulang → **Tahap 4**
-- Manajemen penyewa & kontrak aktif, perpindahan kamar → **Tahap 5**
-- Notifikasi WhatsApp/email sungguhan (pengingat jatuh tempo dst.) → **Tahap 6**
-- Dashboard admin dengan statistik okupansi/pendapatan, laporan & ekspor → **Tahap 7**
+## ✅ Tahap 3 — Pemesanan
 
-## Tahap 2 — Katalog Demera Living
+- `BookingLifecycleService`: `createHold()` (row-locked, mencegah double-booking),
+  `expire()` (dipanggil scheduled command `bookings:expire` tiap 5 menit), `confirm()`
+  (konversi ke Tenant + Lease + Deposit setelah pembayaran diverifikasi)
+- Alur booking penuh di halaman publik: pilih tanggal & durasi, isi data penghuni,
+  unggah KTP, rincian biaya, kode booking unik, halaman konfirmasi
+- Tombol "Pesan Sekarang" di detail kamar aktif (redirect ke login dengan intent bila
+  guest)
 
-- Panel admin CRUD kamar (properti, gedung, lantai, tipe kamar, harga, deposit, biaya
-  tambahan, galeri dengan drag-and-drop, fasilitas)
-- Filter & pencarian publik: ketersediaan, rentang harga, tipe kamar, lantai, kapasitas,
-  fasilitas; pengurutan: terbaru, harga terendah/tertinggi
-- Kalender okupansi admin
-- Riwayat perubahan status kamar (tabel `room_status_histories` sudah siap dipakai)
+## ✅ Tahap 4 — Pembayaran dan Tagihan (manual + QRIS)
 
-## Tahap 3 — Pemesanan
+- `PaymentVerificationService`: customer unggah bukti transfer bank **atau** QRIS
+  (gambar diunggah admin di halaman Pengaturan), admin memverifikasi kedua metode
+  dengan cara yang sama (lihat bukti via signed URL → verifikasi/tolak)
+- `InvoiceService`: tagihan bulanan otomatis (`invoices:generate-monthly`, harian) —
+  bulan pertama sudah dibayar saat booking, periode berikutnya prorata otomatis bila
+  tidak jatuh pas di `billing_cycle_day`; denda keterlambatan (`invoices:mark-overdue`,
+  harian, flat/persentase via Pengaturan)
+- Kuitansi & invoice PDF (dompdf)
+- **Tidak ada payment gateway pihak ketiga** — keputusan eksplisit: hanya transfer
+  manual + QRIS statis, sesuai `PAYMENT_GATEWAY_PROVIDER=manual`
 
-- Profil pengguna diperluas (dokumen identitas, kontak darurat)
-- Alur pemesanan kamar penuh: pilih tanggal & durasi, kalkulasi biaya, isi data
-  penghuni, upload KTP, setujui peraturan, kode booking unik
-- Penahanan kamar sementara + kedaluwarsa otomatis (job terjadwal)
-- Pencegahan double-booking (database transaction + row locking)
+## ✅ Tahap 5 — Penyewa dan Kontrak
 
-## Tahap 4 — Pembayaran dan Tagihan
+- `LeaseManagementService`: perpanjang kontrak (`LeaseExtension` + snapshot harga
+  baru opsional), pindah kamar (lease lama selesai, lease baru + kamar baru terisi),
+  akhiri sewa (kamar dilepas, penyewa nonaktif, deposit dikembalikan penuh/sebagian)
+- Admin bisa menyetujui/menolak booking secara manual (jalur cadangan di luar
+  verifikasi pembayaran otomatis, mis. pembayaran tunai)
+- Keluhan & perawatan: tabel baru `maintenance_comments`, thread dua arah
+  penyewa↔admin, foto opsional
 
-- Invoice otomatis dari booking
-- Integrasi payment gateway (Virtual Account, QRIS, e-wallet) lewat abstraction layer
-  yang sudah disiapkan (`PAYMENT_GATEWAY_PROVIDER`)
-- Transfer manual + QRIS (gambar diunggah admin) + verifikasi admin
-- Webhook + idempotency (tabel `payment_webhooks`, kolom `idempotency_key` sudah siap)
-- Kuitansi & invoice PDF
-- Tagihan bulanan otomatis (job terjadwal), prorata, denda keterlambatan
+## ✅ Tahap 6 — Notifikasi
 
-## Tahap 5 — Penyewa dan Kontrak
+- `NotificationDispatcher`: setiap notifikasi selalu tercatat in-app (channel
+  always-on) + driver channel spesifik (`LogWhatsAppDriver`/`LogEmailDriver`) yang
+  mencatat penuh ke `notification_logs` tanpa benar-benar mengirim
+  (`WHATSAPP_PROVIDER=log` tetap dipertahankan sesuai keputusan awal — tinggal ganti
+  binding driver saat provider asli tersedia)
+- `notifications:send-due-reminders` (harian): 11 template H-7 s.d. H+7 + kontrak akan
+  berakhir; `notifications:retry-failed` (tiap jam)
+- Pusat notifikasi (lonceng + halaman `/notifications`) di kedua layout (admin & customer)
 
-- Aktivasi penyewa dari booking yang lunas
-- Kontrak sewa (dokumen PDF, persetujuan digital sederhana)
-- Perpanjangan kontrak, perpindahan kamar
-- Pengakhiran sewa + pengembalian deposit
+## ✅ Tahap 7 — Laporan dan Dashboard
 
-## Tahap 6 — Notifikasi
-
-- Provider WhatsApp sungguhan (ganti `WHATSAPP_PROVIDER=log` dengan implementasi nyata)
-- Pengiriman email transaksional sungguhan
-- Notification center dalam aplikasi (tabel `notifications` sudah dipakai untuk
-  penghitungan badge, tinggal diisi event nyata)
-- Pengingat jatuh tempo terjadwal (11 template sudah diseed: H-7 s.d. H+7, kontrak akan
-  berakhir, booking dikonfirmasi, pembayaran terverifikasi)
-- Retry + log pengiriman (tabel `notification_logs` sudah siap)
-
-## Tahap 7 — Laporan dan Production Readiness
-
-- Dashboard admin dengan statistik okupansi, pendapatan, tren
-- Laporan: okupansi, penyewa aktif, kontrak akan berakhir, tagihan per periode/terlambat,
-  pendapatan per periode, pembayaran per metode, deposit, ekspor PDF/Excel/CSV
-- Rekonsiliasi pembayaran
-- Hardening keamanan tambahan, load test, UAT, deployment staging → production
+- Dashboard admin: kartu okupansi/kamar/penyewa/booking/pembayaran/tagihan, tren
+  pendapatan 6 bulan, kontrak akan berakhir, notifikasi gagal kirim
+- 10 laporan (okupansi, penyewa aktif, kontrak akan berakhir, tagihan, pendapatan per
+  periode, pembayaran per metode, deposit, pembatalan, riwayat perubahan kamar,
+  performa notifikasi), semua bisa diekspor PDF/Excel/CSV lewat satu jalur generik
 
 ## Catatan integrasi untuk sesi lanjutan
 
 - **Jangan mengedit migration yang sudah ada** — tambah migration baru untuk perubahan
-  skema (misalnya menambah kolom). Ini sudah dipraktikkan di Tahap 1 sendiri: FK
-  `room_status_histories.booking_id` ditambahkan lewat migration terpisah setelah tabel
-  `bookings` dibuat, bukan mengedit migration `room_status_histories` yang sudah ada.
+  skema. Dipraktikkan dua kali: FK `room_status_histories.booking_id` (Tahap 1) dan
+  tabel `maintenance_comments` (Tahap 5).
 - **Harga di kontrak/invoice adalah snapshot** — jangan pernah membaca ulang harga dari
   `rooms`/`room_types` untuk transaksi yang sudah dibuat.
 - **Reservasi permission baru** lewat `RolePermissionSeeder`, bukan hardcode nama role/
   permission di controller.
+- **Perhitungan tanggal berbasis bulan** (kontrak, invoice) harus memakai
+  `addMonthsNoOverflow()`/`addMonthNoOverflow()`, bukan `addMonths()`/`addMonth()` biasa
+  — bug nyata sempat ditemukan di Tahap 5 (tanggal 31 Desember + 2 bulan salah menjadi
+  3 Maret, bukan 28 Februari) sebelum diperbaiki dan disamakan di seluruh
+  `BookingLifecycleService`/`LeaseManagementService`/`InvoiceService`.
+- **Perbandingan strict terhadap hasil `Carbon::diffInDays()`** harus meng-cast ke
+  `(int)` dulu — method ini mengembalikan `float`, sehingga `in_array($x, $arr, true)`
+  akan selalu gagal tanpa cast. Bug ini sempat membuat seluruh pengingat tagihan
+  Tahap 6 tidak pernah terkirim sampai tertangkap oleh test.
+
+## Belum dikerjakan (di luar cakupan 7 tahap ini)
+
+- Katalog/keranjang/checkout Demera Fashion penuh (tetap "Segera Hadir")
+- Integrasi payment gateway pihak ketiga (keputusan sadar: manual transfer + QRIS saja)
+- Provider WhatsApp/email transaksional sungguhan (arsitektur driver sudah siap,
+  tinggal ganti binding — lihat `docs/ARSITEKTUR.md`)
+- Hardening keamanan produksi lanjutan, load test, UAT formal, deployment staging
+  sungguhan (lihat `docs/DEPLOYMENT.md` untuk checklist go-live)
