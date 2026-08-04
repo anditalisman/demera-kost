@@ -49,6 +49,10 @@ const navItems = computed(() => {
         items.push({ label: 'Keluhan', href: route('admin.maintenance-requests.index'), active: route().current('admin.maintenance-requests.*') });
     }
 
+    if (route().has('admin.reports.index') && can('reports.view')) {
+        items.push({ label: 'Laporan', href: route('admin.reports.index'), active: route().current('admin.reports.*') });
+    }
+
     if (route().has('admin.invoices.index') && (can('invoices.view') || can('invoices.manage'))) {
         items.push({ label: 'Invoice', href: route('admin.invoices.index'), active: route().current('admin.invoices.*') });
     }
