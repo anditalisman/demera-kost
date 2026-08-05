@@ -3,6 +3,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { formatDateTime } from '@/lib/date';
 
 interface RequestRow {
     id: number;
@@ -46,7 +47,7 @@ const STATUS_CLASS: Record<string, string> = {
             >
                 <div>
                     <p class="font-medium text-charcoal-800">{{ req.title }}</p>
-                    <p class="text-xs text-charcoal-400">{{ req.created_at }}</p>
+                    <p class="text-xs text-charcoal-400">{{ formatDateTime(req.created_at) }}</p>
                 </div>
                 <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="STATUS_CLASS[req.status]">{{ STATUS_LABEL[req.status] }}</span>
             </Link>

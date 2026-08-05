@@ -2,6 +2,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 
@@ -68,7 +69,7 @@ function applyFilters() {
                         <td class="px-4 py-3 font-medium text-charcoal-800">{{ lease.lease_number }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ lease.tenant.user.name }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ lease.room.name ?? `Kamar ${lease.room.room_number}` }}</td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ lease.start_date }} s.d. {{ lease.end_date }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ formatDate(lease.start_date) }} s.d. {{ formatDate(lease.end_date) }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ formatIdr(lease.monthly_price) }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ STATUS_LABEL[lease.status] }}</td>
                         <td class="px-4 py-3 text-right">

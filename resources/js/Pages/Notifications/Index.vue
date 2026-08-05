@@ -4,6 +4,7 @@ import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { PageProps } from '@/types';
+import { formatDateTime } from '@/lib/date';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -56,7 +57,7 @@ function markAllRead() {
                     <span v-if="!n.read_at" class="h-2 w-2 rounded-full bg-terracotta-500"></span>
                 </div>
                 <p v-if="n.body" class="mt-1 text-sm text-charcoal-600">{{ n.body }}</p>
-                <p class="mt-1 text-xs text-charcoal-400">{{ n.created_at }}</p>
+                <p class="mt-1 text-xs text-charcoal-400">{{ formatDateTime(n.created_at) }}</p>
             </button>
 
             <p v-if="notifications.data.length === 0" class="py-12 text-center text-sm text-charcoal-400">Belum ada notifikasi.</p>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head } from '@inertiajs/vue3';
 
 interface InvoiceItem {
@@ -52,8 +53,8 @@ const customer = props.invoice.booking?.user ?? props.invoice.tenant?.user;
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
             <div class="lg:col-span-2 rounded-xl border border-beige-200 bg-white p-6 shadow-soft">
                 <p class="text-sm text-charcoal-500">Pelanggan: <span class="font-medium text-charcoal-800">{{ customer?.name }}</span> ({{ customer?.email }})</p>
-                <p class="mt-1 text-sm text-charcoal-500">Periode: {{ invoice.period_start ?? '-' }} s.d. {{ invoice.period_end ?? '-' }}</p>
-                <p class="mt-1 text-sm text-charcoal-500">Jatuh Tempo: {{ invoice.due_date }}</p>
+                <p class="mt-1 text-sm text-charcoal-500">Periode: {{ formatDate(invoice.period_start) }} s.d. {{ formatDate(invoice.period_end) }}</p>
+                <p class="mt-1 text-sm text-charcoal-500">Jatuh Tempo: {{ formatDate(invoice.due_date) }}</p>
 
                 <table class="mt-4 w-full text-sm">
                     <tbody class="divide-y divide-beige-100">

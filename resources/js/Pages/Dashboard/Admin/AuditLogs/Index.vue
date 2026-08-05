@@ -3,6 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { formatDateTime } from '@/lib/date';
 
 interface AuditLogRow {
     id: number;
@@ -65,7 +66,7 @@ function shortModel(type: string | null): string {
                 </thead>
                 <tbody class="divide-y divide-beige-100">
                     <tr v-for="log in logs.data" :key="log.id">
-                        <td class="whitespace-nowrap px-4 py-3 text-charcoal-500">{{ log.created_at }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 text-charcoal-500">{{ formatDateTime(log.created_at) }}</td>
                         <td class="px-4 py-3 text-charcoal-700">{{ log.user?.name ?? 'Sistem' }}</td>
                         <td class="px-4 py-3">
                             <span class="rounded-full bg-terracotta-50 px-2 py-0.5 text-xs font-medium text-terracotta-700">{{ log.action }}</span>

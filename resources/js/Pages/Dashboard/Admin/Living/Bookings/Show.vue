@@ -6,6 +6,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate, formatDateTime } from '@/lib/date';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -62,10 +63,10 @@ function submitReject() {
             <dl class="grid gap-3 text-sm sm:grid-cols-2">
                 <div><dt class="text-charcoal-400">Pelanggan</dt><dd class="font-medium text-charcoal-800">{{ booking.user.name }} ({{ booking.user.email }})</dd></div>
                 <div><dt class="text-charcoal-400">Kamar</dt><dd>{{ booking.room.name ?? `Kamar ${booking.room.room_number}` }} — {{ booking.room.property.name }}</dd></div>
-                <div><dt class="text-charcoal-400">Mulai Sewa</dt><dd>{{ booking.start_date }} ({{ booking.duration_months }} bulan)</dd></div>
+                <div><dt class="text-charcoal-400">Mulai Sewa</dt><dd>{{ formatDate(booking.start_date) }} ({{ booking.duration_months }} bulan)</dd></div>
                 <div><dt class="text-charcoal-400">Total</dt><dd>{{ formatIdr(booking.total_amount) }}</dd></div>
                 <div><dt class="text-charcoal-400">Status</dt><dd>{{ STATUS_LABEL[booking.status] }}</dd></div>
-                <div v-if="booking.payment_due_at"><dt class="text-charcoal-400">Batas Bayar</dt><dd>{{ booking.payment_due_at }}</dd></div>
+                <div v-if="booking.payment_due_at"><dt class="text-charcoal-400">Batas Bayar</dt><dd>{{ formatDateTime(booking.payment_due_at) }}</dd></div>
             </dl>
 
             <div class="mt-4 border-t border-beige-100 pt-4">

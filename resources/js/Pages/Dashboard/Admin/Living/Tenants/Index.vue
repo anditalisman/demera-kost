@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
+import { formatDate } from '@/lib/date';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { reactive } from 'vue';
 
@@ -74,7 +75,7 @@ function applyFilters() {
                             <template v-if="tenant.room">{{ tenant.room.name ?? `Kamar ${tenant.room.room_number}` }} &middot; {{ tenant.room.property.name }}</template>
                             <template v-else>-</template>
                         </td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ tenant.joined_at ?? '-' }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ formatDate(tenant.joined_at) }}</td>
                         <td class="px-4 py-3">
                             <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="STATUS_CLASS[tenant.status]">{{ STATUS_LABEL[tenant.status] }}</span>
                         </td>

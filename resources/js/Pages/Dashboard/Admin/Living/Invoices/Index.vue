@@ -2,6 +2,7 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 interface InvoiceRow {
@@ -87,7 +88,7 @@ function filterByStatus(status: string) {
                         <td class="px-4 py-3 font-medium text-charcoal-800">{{ invoice.invoice_number }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ customerName(invoice) }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ invoice.invoice_type }}</td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ invoice.due_date }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ formatDate(invoice.due_date) }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ formatIdr(invoice.total_amount) }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ formatIdr(invoice.paid_amount) }}</td>
                         <td class="px-4 py-3">

@@ -2,6 +2,7 @@
 import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface InvoiceRow {
@@ -62,7 +63,7 @@ function roomLabel(invoice: InvoiceRow): string {
             >
                 <div>
                     <p class="font-medium text-charcoal-800">{{ invoice.invoice_number }}</p>
-                    <p class="text-sm text-charcoal-500">{{ roomLabel(invoice) }} &middot; Jatuh tempo {{ invoice.due_date }}</p>
+                    <p class="text-sm text-charcoal-500">{{ roomLabel(invoice) }} &middot; Jatuh tempo {{ formatDate(invoice.due_date) }}</p>
                 </div>
                 <div class="text-right">
                     <p class="font-semibold text-charcoal-800">{{ formatIdr(invoice.total_amount) }}</p>

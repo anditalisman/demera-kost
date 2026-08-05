@@ -2,6 +2,7 @@
 import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface InvoiceItem {
@@ -65,7 +66,7 @@ const canPay = props.invoice.status === 'unpaid' || props.invoice.status === 'pa
                     </Link>
                 </div>
             </div>
-            <p class="mt-1 text-sm text-charcoal-500">Jatuh tempo {{ invoice.due_date }} &middot; {{ STATUS_LABEL[invoice.status] }}</p>
+            <p class="mt-1 text-sm text-charcoal-500">Jatuh tempo {{ formatDate(invoice.due_date) }} &middot; {{ STATUS_LABEL[invoice.status] }}</p>
 
             <table class="mt-6 w-full text-sm">
                 <tbody class="divide-y divide-beige-100">

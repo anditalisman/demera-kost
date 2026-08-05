@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface LeaseRow {
@@ -71,8 +72,8 @@ const LEASE_STATUS_LABEL: Record<string, string> = {
                     <div><dt class="text-charcoal-400">Email</dt><dd>{{ tenant.user.email }}</dd></div>
                     <div><dt class="text-charcoal-400">WhatsApp</dt><dd>{{ tenant.user.whatsapp_number ?? '-' }}</dd></div>
                     <div><dt class="text-charcoal-400">Kamar Saat Ini</dt><dd>{{ tenant.room ? (tenant.room.name ?? `Kamar ${tenant.room.room_number}`) + ' — ' + tenant.room.property.name : '-' }}</dd></div>
-                    <div><dt class="text-charcoal-400">Bergabung</dt><dd>{{ tenant.joined_at ?? '-' }}</dd></div>
-                    <div v-if="tenant.moved_out_at"><dt class="text-charcoal-400">Keluar</dt><dd>{{ tenant.moved_out_at }}</dd></div>
+                    <div><dt class="text-charcoal-400">Bergabung</dt><dd>{{ formatDate(tenant.joined_at) }}</dd></div>
+                    <div v-if="tenant.moved_out_at"><dt class="text-charcoal-400">Keluar</dt><dd>{{ formatDate(tenant.moved_out_at) }}</dd></div>
                     <div><dt class="text-charcoal-400">Kontak Darurat</dt><dd>{{ tenant.emergency_contact_name ?? '-' }} ({{ tenant.emergency_contact_phone ?? '-' }})</dd></div>
                 </dl>
 

@@ -2,6 +2,7 @@
 import CustomerLayout from '@/Layouts/CustomerLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { formatDateTime } from '@/lib/date';
 
 interface AttachmentRow {
     id: number;
@@ -60,7 +61,7 @@ function submitComment() {
                     <li v-for="c in maintenanceRequest.comments" :key="c.id" class="rounded-lg bg-cream-50 p-3 text-sm">
                         <p class="font-medium text-charcoal-800">{{ c.user.name }}</p>
                         <p class="mt-1 text-charcoal-600">{{ c.comment }}</p>
-                        <p class="mt-1 text-xs text-charcoal-400">{{ c.created_at }}</p>
+                        <p class="mt-1 text-xs text-charcoal-400">{{ formatDateTime(c.created_at) }}</p>
                     </li>
                     <li v-if="maintenanceRequest.comments.length === 0" class="text-xs text-charcoal-400">Belum ada komentar.</li>
                 </ul>

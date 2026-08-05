@@ -5,6 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 interface ExtensionRow {
@@ -77,7 +78,7 @@ function submitTerminate() {
             <dl class="grid gap-3 text-sm sm:grid-cols-2">
                 <div><dt class="text-charcoal-400">Penyewa</dt><dd class="font-medium text-charcoal-800">{{ lease.tenant.user.name }}</dd></div>
                 <div><dt class="text-charcoal-400">Kamar</dt><dd>{{ lease.room.name ?? `Kamar ${lease.room.room_number}` }} — {{ lease.room.property.name }}</dd></div>
-                <div><dt class="text-charcoal-400">Periode</dt><dd>{{ lease.start_date }} s.d. {{ lease.end_date }} ({{ lease.duration_months }} bulan)</dd></div>
+                <div><dt class="text-charcoal-400">Periode</dt><dd>{{ formatDate(lease.start_date) }} s.d. {{ formatDate(lease.end_date) }} ({{ lease.duration_months }} bulan)</dd></div>
                 <div><dt class="text-charcoal-400">Harga/Bulan</dt><dd>{{ formatIdr(lease.monthly_price) }}</dd></div>
                 <div><dt class="text-charcoal-400">Deposit</dt><dd>{{ formatIdr(lease.deposit_amount) }}</dd></div>
                 <div><dt class="text-charcoal-400">Status</dt><dd>{{ STATUS_LABEL[lease.status] }}</dd></div>
@@ -147,7 +148,7 @@ function submitTerminate() {
                 <h2 class="font-display text-sm font-semibold uppercase tracking-wide text-charcoal-500">Riwayat Perpanjangan</h2>
                 <ul class="mt-3 space-y-2 text-sm">
                     <li v-for="ext in lease.extensions" :key="ext.id" class="rounded-lg bg-cream-50 px-3 py-2">
-                        {{ ext.previous_end_date }} &rarr; {{ ext.new_end_date }} ({{ formatIdr(ext.price_at_extension) }}/bulan)
+                        {{ formatDate(ext.previous_end_date) }} &rarr; {{ formatDate(ext.new_end_date) }} ({{ formatIdr(ext.price_at_extension) }}/bulan)
                     </li>
                     <li v-if="lease.extensions.length === 0" class="text-xs text-charcoal-400">Belum pernah diperpanjang.</li>
                 </ul>

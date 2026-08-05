@@ -2,6 +2,7 @@
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate, formatDateTime } from '@/lib/date';
 import { Head, Link } from '@inertiajs/vue3';
 
 interface InvoiceItem {
@@ -90,7 +91,7 @@ const STATUS_CLASS: Record<string, string> = {
                         <p class="font-medium text-charcoal-800">{{ booking.room.name ?? `Kamar ${booking.room.room_number}` }}</p>
                         <p class="text-sm text-charcoal-500">{{ booking.room.property.name }}, {{ booking.room.property.city }}</p>
                         <p class="mt-1 text-sm text-charcoal-500">
-                            Mulai {{ booking.start_date }} &middot; {{ booking.duration_months }} bulan
+                            Mulai {{ formatDate(booking.start_date) }} &middot; {{ booking.duration_months }} bulan
                         </p>
                     </div>
                 </div>
@@ -110,7 +111,7 @@ const STATUS_CLASS: Record<string, string> = {
                 </div>
 
                 <div v-if="booking.status === 'awaiting_payment' && booking.payment_due_at" class="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800">
-                    <p>Selesaikan pembayaran sebelum <strong>{{ booking.payment_due_at }}</strong>, atau kamar akan dilepas kembali secara otomatis.</p>
+                    <p>Selesaikan pembayaran sebelum <strong>{{ formatDateTime(booking.payment_due_at) }}</strong>, atau kamar akan dilepas kembali secara otomatis.</p>
                     <Link v-if="booking.invoices[0]" :href="route('payments.create', booking.invoices[0].id)">
                         <PrimaryButton class="mt-3">Bayar Sekarang</PrimaryButton>
                     </Link>

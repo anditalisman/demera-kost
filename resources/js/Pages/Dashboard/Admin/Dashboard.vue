@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { formatIdr } from '@/lib/roomStatus';
+import { formatDate } from '@/lib/date';
 import { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -125,7 +126,7 @@ const cards = [
                 <ul class="mt-3 space-y-2">
                     <li v-for="lease in leasesEndingSoon" :key="lease.id" class="rounded-lg bg-cream-50 px-3 py-2 text-sm">
                         <p class="font-medium text-charcoal-800">{{ lease.tenant_name }}</p>
-                        <p class="text-xs text-charcoal-500">{{ lease.room_label }} &middot; berakhir {{ lease.end_date }}</p>
+                        <p class="text-xs text-charcoal-500">{{ lease.room_label }} &middot; berakhir {{ formatDate(lease.end_date) }}</p>
                     </li>
                     <li v-if="leasesEndingSoon.length === 0" class="text-xs text-charcoal-400">Tidak ada kontrak yang akan berakhir dalam 30 hari.</li>
                 </ul>
