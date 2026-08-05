@@ -40,14 +40,22 @@ server {
     # The private bucket has anonymous access disabled at the MinIO level
     # (see minio-init in docker-compose.yml), so only valid presigned URLs
     # from PrivateDocumentUrlService actually resolve here.
+    #
+    # This proxies via the host (host.docker.internal + MinIO's published
+    # host port) rather than the "minio" container hostname on the internal
+    # "demera" network. When this nginx container is also attached to the
+    # Traefik-managed "dokploy-network" overlay network (required for HTTPS
+    # routing), MinIO on the plain bridge network becomes unreachable through
+    # it — MinIO returns a bare AccessDenied for every request that arrives
+    # over that path, regardless of headers/credentials, while the exact same
+    # request succeeds over any single network or via the host. Routing
+    # through the host side-steps that overlay+bridge interaction entirely.
     location ^~ /demera-public/ {
-        set $upstream_minio minio:9000;
-        proxy_pass http://$upstream_minio;
+        proxy_pass http://host.docker.internal:${MINIO_API_PORT}/demera-public/;
     }
 
     location ^~ /demera-private/ {
-        set $upstream_minio minio:9000;
-        proxy_pass http://$upstream_minio;
+        proxy_pass http://host.docker.internal:${MINIO_API_PORT}/demera-private/;
     }
 
     location / {
