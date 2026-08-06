@@ -199,6 +199,7 @@ services:
       - ROUNDCUBEMAIL_DB_TYPE=sqlite
     volumes:
       - webmail_data:/var/roundcube/db
+      - ./docker/webmail/tls-verify-override.sh:/entrypoint-tasks/post-setup/10-tls-verify-override.sh:ro
     labels:
       - traefik.docker.network=dokploy-network
       - traefik.http.routers.demera-webmail-web.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-mail.demera.my.id}`)
