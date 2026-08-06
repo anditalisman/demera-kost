@@ -39,6 +39,9 @@ services:
       # nobody actually browses this host. Reuses this same nginx container
       # as the (unused) HTTP backend since Traefik requires some service.
       - traefik.docker.network=dokploy-network
+      - traefik.http.routers.demera-smtp-cert-web.rule=Host(`${MAIL_HOSTNAME:-smtp.demera.my.id}`)
+      - traefik.http.routers.demera-smtp-cert-web.entrypoints=web
+      - traefik.http.routers.demera-smtp-cert-web.service=demera-smtp-cert
       - traefik.http.routers.demera-smtp-cert.rule=Host(`${MAIL_HOSTNAME:-smtp.demera.my.id}`)
       - traefik.http.routers.demera-smtp-cert.entrypoints=websecure
       - traefik.http.routers.demera-smtp-cert.service=demera-smtp-cert
@@ -159,13 +162,29 @@ services:
     image: ldez/traefik-certs-dumper:latest
     container_name: demera_certs_dumper
     restart: unless-stopped
+    environment:
+      - MAIL_HOSTNAME=${MAIL_HOSTNAME:-smtp.demera.my.id}
     volumes:
       - /etc/dokploy/traefik/dynamic/acme.json:/acme.json:ro
       - mail_certs:/output
+    # traefik-certs-dumper's own output filenames (certificate.crt /
+    # privatekey.key) don't match what docker-mailserver looks for
+    # (fullchain.pem / privkey.pem under /etc/letsencrypt/live/<domain>/)
+    # — dump to a scratch subdir first, then copy into the exact names/path
+    # docker-mailserver requires.
     entrypoint:
       - /bin/sh
       - -c
-      - "while true; do traefik-certs-dumper file --version v2 --source /acme.json --dest /output --domain-subdir; sleep 3600; done"
+      - |
+        while true; do
+          traefik-certs-dumper file --version v2 --source /acme.json --dest /output/_raw --domain-subdir
+          if [ -f "/output/_raw/${MAIL_HOSTNAME}/certificate.crt" ]; then
+            mkdir -p "/output/${MAIL_HOSTNAME}"
+            cp "/output/_raw/${MAIL_HOSTNAME}/certificate.crt" "/output/${MAIL_HOSTNAME}/fullchain.pem"
+            cp "/output/_raw/${MAIL_HOSTNAME}/privatekey.key" "/output/${MAIL_HOSTNAME}/privkey.pem"
+          fi
+          sleep 3600
+        done
 
   mailserver:
     image: docker.io/mailserver/docker-mailserver:latest
