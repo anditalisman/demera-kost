@@ -41,6 +41,13 @@ services:
     image: mysql:8.0
     container_name: demera_mysql
     restart: unless-stopped
+    # Migrations using useCurrent() (audit_logs, room_status_histories, etc.)
+    # rely on MySQL's own CURRENT_TIMESTAMP default, evaluated in MySQL's
+    # session timezone — without this it defaults to UTC regardless of
+    # APP_TIMEZONE, out of step with every timestamp Eloquent sets itself.
+    # A numeric offset (not "Asia/Jakarta") because the mysql:8.0 image has
+    # no populated timezone tables for named zones by default.
+    command: ["--default-time-zone=+07:00"]
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-demera}
       MYSQL_USER: ${DB_USERNAME:-demera}
