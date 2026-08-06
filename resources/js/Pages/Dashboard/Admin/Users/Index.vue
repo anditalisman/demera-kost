@@ -4,6 +4,7 @@ import Modal from '@/Components/Modal.vue';
 import Pagination from '@/Components/Pagination.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
+import DangerButton from '@/Components/DangerButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import { PageProps } from '@/types';
@@ -63,6 +64,20 @@ function toggleActive(user: UserRow) {
     if (user.id === page.props.auth.user?.id) return;
     router.put(route('admin.users.toggle-active', user.id));
 }
+
+const deleting = ref<UserRow | null>(null);
+const deleteForm = useForm({});
+
+function confirmDelete(user: UserRow) {
+    deleting.value = user;
+}
+
+function destroyUser() {
+    if (!deleting.value) return;
+    deleteForm.delete(route('admin.users.destroy', deleting.value.id), {
+        onSuccess: () => (deleting.value = null),
+    });
+}
 </script>
 
 <template>
@@ -116,10 +131,17 @@ function toggleActive(user: UserRow) {
                             <button class="mr-3 text-terracotta-600 hover:underline" @click="openEdit(user)">Atur Role</button>
                             <button
                                 v-if="user.id !== page.props.auth.user?.id"
-                                class="text-red-600 hover:underline"
+                                class="mr-3 text-red-600 hover:underline"
                                 @click="toggleActive(user)"
                             >
                                 {{ user.is_active ? 'Nonaktifkan' : 'Aktifkan' }}
+                            </button>
+                            <button
+                                v-if="user.id !== page.props.auth.user?.id"
+                                class="text-red-700 hover:underline"
+                                @click="confirmDelete(user)"
+                            >
+                                Hapus
                             </button>
                         </td>
                     </tr>
@@ -149,6 +171,21 @@ function toggleActive(user: UserRow) {
                     <PrimaryButton :disabled="form.processing">Simpan</PrimaryButton>
                 </div>
             </form>
+        </Modal>
+
+        <Modal :show="!!deleting" @close="deleting = null">
+            <div class="p-6">
+                <h2 class="font-display text-lg font-semibold text-charcoal-800">Hapus Pengguna</h2>
+                <p class="mt-2 text-sm text-charcoal-500">
+                    Yakin ingin menghapus <strong>{{ deleting?.name }}</strong> ({{ deleting?.email }})? Akun ini tidak akan bisa
+                    login lagi.
+                </p>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <SecondaryButton type="button" @click="deleting = null">Batal</SecondaryButton>
+                    <DangerButton type="button" :disabled="deleteForm.processing" @click="destroyUser">Hapus</DangerButton>
+                </div>
+            </div>
         </Modal>
     </AdminLayout>
 </template>

@@ -80,4 +80,21 @@ class UserController extends Controller
 
         return back()->with('success', $user->is_active ? "{$user->name} diaktifkan kembali." : "{$user->name} dinonaktifkan.");
     }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->authorize('delete', $user);
+
+        $name = $user->name;
+
+        $user->delete();
+
+        AuditLogger::log(
+            'user_deleted',
+            $user,
+            description: "{$name} dihapus oleh ".auth()->user()->name,
+        );
+
+        return back()->with('success', "{$name} berhasil dihapus.");
+    }
 }
