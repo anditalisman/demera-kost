@@ -21,7 +21,7 @@ class InvoiceController extends Controller
                 $q->whereHas('booking', fn ($bq) => $bq->where('user_id', $user->id))
                     ->orWhereHas('tenant', fn ($tq) => $tq->where('user_id', $user->id));
             })
-            ->with(['booking.room', 'tenant.room'])
+            ->with(['booking.room', 'tenant.room', 'payments:id,invoice_id,status'])
             ->orderByDesc('created_at')
             ->paginate(10);
 

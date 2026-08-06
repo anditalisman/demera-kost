@@ -14,6 +14,7 @@ interface InvoiceRow {
     due_date: string;
     booking: { room: { name: string | null; room_number: string } } | null;
     tenant: { room: { name: string | null; room_number: string } } | null;
+    payments: { status: string }[];
 }
 interface Paginated<T> {
     data: T[];
@@ -46,6 +47,25 @@ function roomLabel(invoice: InvoiceRow): string {
     if (!room) return '-';
     return room.name ?? `Kamar ${room.room_number}`;
 }
+
+// invoice.status stays "unpaid" until an admin verifies the payment — flag
+// invoices with a pending proof separately so the list doesn't look
+// identical to one nobody has paid anything towards yet.
+function hasPendingPayment(invoice: InvoiceRow): boolean {
+    return invoice.payments.some((payment) => payment.status === 'pending');
+}
+function statusLabel(invoice: InvoiceRow): string {
+    if (hasPendingPayment(invoice) && ['unpaid', 'partially_paid', 'overdue'].includes(invoice.status)) {
+        return 'Menunggu Verifikasi';
+    }
+    return STATUS_LABEL[invoice.status] ?? invoice.status;
+}
+function statusClass(invoice: InvoiceRow): string {
+    if (hasPendingPayment(invoice) && ['unpaid', 'partially_paid', 'overdue'].includes(invoice.status)) {
+        return 'bg-blue-50 text-blue-700';
+    }
+    return STATUS_CLASS[invoice.status] ?? '';
+}
 </script>
 
 <template>
@@ -67,8 +87,8 @@ function roomLabel(invoice: InvoiceRow): string {
                 </div>
                 <div class="text-right">
                     <p class="font-semibold text-charcoal-800">{{ formatIdr(invoice.total_amount) }}</p>
-                    <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="STATUS_CLASS[invoice.status]">
-                        {{ STATUS_LABEL[invoice.status] }}
+                    <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(invoice)">
+                        {{ statusLabel(invoice) }}
                     </span>
                 </div>
             </Link>

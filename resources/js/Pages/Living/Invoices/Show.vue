@@ -4,6 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { formatIdr } from '@/lib/roomStatus';
 import { formatDate } from '@/lib/date';
 import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface InvoiceItem {
     id: number;
@@ -50,6 +51,15 @@ const PAYMENT_STATUS_LABEL: Record<string, string> = {
 };
 
 const canPay = props.invoice.status === 'unpaid' || props.invoice.status === 'partially_paid' || props.invoice.status === 'overdue';
+
+// invoice.status has no "awaiting verification" state of its own — it only
+// changes once an admin verifies a payment — so without this, the header
+// keeps reading "Belum Dibayar" right after a proof upload with no visible
+// sign the upload was received, easy to mistake for a failed upload.
+const hasPendingPayment = computed(() => props.invoice.payments.some((payment) => payment.status === 'pending'));
+const displayStatusLabel = computed(() =>
+    hasPendingPayment.value && canPay ? 'Menunggu Verifikasi' : (STATUS_LABEL[props.invoice.status] ?? props.invoice.status),
+);
 </script>
 
 <template>
@@ -66,7 +76,15 @@ const canPay = props.invoice.status === 'unpaid' || props.invoice.status === 'pa
                     </Link>
                 </div>
             </div>
-            <p class="mt-1 text-sm text-charcoal-500">Jatuh tempo {{ formatDate(invoice.due_date) }} &middot; {{ STATUS_LABEL[invoice.status] }}</p>
+            <p class="mt-1 text-sm text-charcoal-500">Jatuh tempo {{ formatDate(invoice.due_date) }} &middot; {{ displayStatusLabel }}</p>
+
+            <div v-if="hasPendingPayment" class="mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <span class="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500"></span>
+                <p>
+                    Bukti pembayaran kamu sudah diterima dan sedang <strong>menunggu diverifikasi</strong> oleh admin. Status akan
+                    berubah menjadi Lunas setelah diverifikasi — biasanya tidak lama.
+                </p>
+            </div>
 
             <table class="mt-6 w-full text-sm">
                 <tbody class="divide-y divide-beige-100">
