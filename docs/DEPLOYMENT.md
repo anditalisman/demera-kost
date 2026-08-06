@@ -49,6 +49,65 @@ docker compose exec app php artisan route:cache
 docker compose exec app php artisan view:cache
 ```
 
+## Mail server self-hosted (docker-mailserver + Roundcube)
+
+`docker-compose.yml` menyediakan mail server sendiri (`mailserver` — Postfix +
+Dovecot + OpenDKIM/OpenDMARC) dan webmail (`webmail` — Roundcube), untuk kasus
+tidak ingin bergantung pada SMTP relay pihak ketiga (Gmail/Mailgun/dst).
+
+**Trade-off yang harus dipahami sebelum pakai ini di production**: tanpa DNS
+record yang benar (di bawah) dan PTR record, hampir semua email yang dikirim
+akan ditolak atau masuk spam di Gmail/Outlook/Yahoo — ini bukan sesuatu yang
+bisa diperbaiki dari sisi container/aplikasi saja. Untuk volume kecil dan mulai
+cepat, SMTP relay (Mailgun, dsb) jauh lebih reliable tanpa setup DNS ini.
+
+### DNS record yang wajib ada di registrar `demera.my.id`
+
+| Tipe | Host | Value | Keterangan |
+|---|---|---|---|
+| A | `smtp` (atau sesuai `MAIL_HOSTNAME`) | IP server ini | Wajib, dipakai untuk HELO/EHLO & sertifikat |
+| A | `webmail` (atau sesuai `MAIL_WEBMAIL_DOMAIN`) | IP server ini | Untuk akses Roundcube via Traefik |
+| MX | `@` (root domain) | `smtp.demera.my.id` (prioritas 10) | Supaya domain bisa menerima email masuk |
+| TXT (SPF) | `@` | `v=spf1 mx ~all` | Menyatakan server MX ini boleh kirim atas nama domain |
+| TXT (DKIM) | `mail._domainkey` | (lihat cara ambil di bawah) | Tanda tangan digital email |
+| TXT (DMARC) | `_dmarc` | `v=DMARC1; p=quarantine; rua=mailto:postmaster@demera.my.id` | Kebijakan penanganan email gagal SPF/DKIM |
+| PTR (reverse DNS) | — | `smtp.demera.my.id` | **Diatur oleh provider VPS, bukan di registrar domain** — hubungi provider, tanpa ini banyak mail server besar langsung menolak koneksi |
+
+Juga cek ke provider VPS apakah **port 25 outbound** diblokir (umum untuk
+mencegah spam dari VPS) — kalau diblokir, mail server ini tidak bisa mengirim
+ke server lain sama sekali dan perlu diminta untuk dibuka.
+
+### Setup pertama kali (sekali saja setelah container `mailserver` jalan)
+
+```bash
+# 1. Buat akun pengirim (dipakai sebagai MAIL_USERNAME/MAIL_PASSWORD di .env)
+docker compose exec mailserver setup email add no-reply@demera.my.id 'password-kuat-di-sini'
+
+# 2. Generate DKIM key
+docker compose exec mailserver setup config dkim
+
+# 3. Ambil TXT record DKIM yang perlu ditambahkan ke DNS
+docker compose exec mailserver cat /tmp/docker-mailserver/opendkim/keys/demera.my.id/mail.txt
+```
+
+Salin output langkah 3 apa adanya ke DNS record TXT `mail._domainkey.demera.my.id`.
+
+Tambah akun lain (mis. untuk dibaca lewat webmail) dengan pola yang sama:
+`docker compose exec mailserver setup email add nama@demera.my.id 'password'`.
+
+### Verifikasi setelah DNS propagate (bisa 1–24 jam)
+
+```bash
+# Cek semua record terbaca benar dari luar
+dig MX demera.my.id
+dig TXT demera.my.id          # SPF
+dig TXT mail._domainkey.demera.my.id   # DKIM
+dig TXT _dmarc.demera.my.id   # DMARC
+
+# Kirim email tes dan cek header Authentication-Results di email yang diterima
+# (harus menunjukkan spf=pass dkim=pass dmarc=pass)
+```
+
 ## Opsi B — Non-Docker (bare-metal / VM)
 
 Prasyarat: PHP 8.4-FPM + ekstensi (`pdo_mysql mbstring exif pcntl bcmath intl zip gd

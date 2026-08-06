@@ -15,6 +15,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      mailserver:
+        condition: service_healthy
     networks: [demera]
 
   nginx:
@@ -135,6 +137,82 @@ services:
     entrypoint: ["/bin/sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
     networks: [demera]
 
+  mailserver:
+    image: docker.io/mailserver/docker-mailserver:latest
+    container_name: demera_mailserver
+    hostname: ${MAIL_HOSTNAME:-smtp.demera.my.id}
+    restart: unless-stopped
+    ports:
+      - "${MAIL_SMTP_PORT:-25}:25"
+      - "${MAIL_SUBMISSION_PORT:-587}:587"
+      - "${MAIL_SUBMISSIONS_PORT:-465}:465"
+      - "${MAIL_IMAPS_PORT:-993}:993"
+    volumes:
+      - mail_data:/var/mail
+      - mail_state:/var/mail-state
+      - mail_logs:/var/log/mail
+      - mail_config:/tmp/docker-mailserver
+    environment:
+      - OVERRIDE_HOSTNAME=${MAIL_HOSTNAME:-smtp.demera.my.id}
+      - PERMIT_DOCKER=network
+      - SSL_TYPE=self-signed
+      - ONE_DIR=1
+      - ENABLE_SPAMASSASSIN=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_FAIL2BAN=0
+      - ENABLE_OPENDKIM=1
+      - ENABLE_OPENDMARC=1
+    cap_add:
+      - NET_ADMIN
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    # Deliberately NOT on dokploy-network: any container attached to both
+    # this bridge network and the Traefik overlay network gets its requests
+    # to other "demera" peers mishandled at the application layer (see the
+    # nginx->MinIO proxy fix for the fully diagnosed root cause) — mailserver
+    # never needs Traefik routing anyway, so it just stays off that network.
+    networks: [demera]
+
+  webmail:
+    image: roundcube/roundcubemail:latest
+    container_name: demera_webmail
+    restart: unless-stopped
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://host.docker.internal
+      - ROUNDCUBEMAIL_DEFAULT_PORT=${MAIL_IMAPS_PORT:-993}
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://host.docker.internal
+      - ROUNDCUBEMAIL_SMTP_PORT=${MAIL_SUBMISSION_PORT:-587}
+      - ROUNDCUBEMAIL_DB_TYPE=sqlite
+    volumes:
+      - webmail_data:/var/roundcube/db
+    # Reaches mailserver via the host's published ports (see mailserver's
+    # network comment above) instead of the internal "demera" network, since
+    # this container needs dokploy-network for Traefik and mixing the two
+    # network types breaks connectivity to "demera" peers.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    labels:
+      - traefik.docker.network=dokploy-network
+      - traefik.http.routers.demera-webmail-web.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-webmail.demera.my.id}`)
+      - traefik.http.routers.demera-webmail-web.entrypoints=web
+      - traefik.http.services.demera-webmail-web.loadbalancer.server.port=80
+      - traefik.http.routers.demera-webmail-web.service=demera-webmail-web
+      - traefik.http.routers.demera-webmail-web.middlewares=redirect-to-https@file
+      - traefik.http.routers.demera-webmail-websecure.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-webmail.demera.my.id}`)
+      - traefik.http.routers.demera-webmail-websecure.entrypoints=websecure
+      - traefik.http.services.demera-webmail-websecure.loadbalancer.server.port=80
+      - traefik.http.routers.demera-webmail-websecure.service=demera-webmail-websecure
+      - traefik.http.routers.demera-webmail-websecure.tls.certresolver=letsencrypt
+      - traefik.enable=true
+    networks:
+      - dokploy-network
+    depends_on:
+      - mailserver
+
   vite:
     image: node:20-alpine
     container_name: demera_vite
@@ -158,8 +236,15 @@ networks:
     ipam:
       config:
         - subnet: 10.20.31.0/24
+  dokploy-network:
+    external: true
 
 volumes:
   mysql_data:
   redis_data:
   minio_data:
+  mail_data:
+  mail_state:
+  mail_logs:
+  mail_config:
+  webmail_data:

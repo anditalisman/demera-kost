@@ -47,6 +47,16 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            // Only needed for the self-hosted mailserver's self-signed cert
+            // (see docker-compose.yml's "mailserver" service) — leave unset
+            // for any real SMTP provider (Gmail, Mailgun, SES, ...).
+            'stream' => [
+                'ssl' => [
+                    'allow_self_signed' => (bool) env('MAIL_ALLOW_SELF_SIGNED', false),
+                    'verify_peer' => ! (bool) env('MAIL_ALLOW_SELF_SIGNED', false),
+                    'verify_peer_name' => ! (bool) env('MAIL_ALLOW_SELF_SIGNED', false),
+                ],
+            ],
         ],
 
         'ses' => [
