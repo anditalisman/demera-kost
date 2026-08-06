@@ -23,7 +23,7 @@ interface BookingDetail {
     duration_months: number;
     total_amount: string;
     payment_due_at: string | null;
-    user: { name: string; email: string };
+    user: { name: string; email: string } | null;
     room: { name: string | null; room_number: string; property: { name: string } };
     guests: GuestRow[];
     invoices: { id: number; invoice_number: string; status: string; total_amount: string }[];
@@ -61,7 +61,7 @@ function submitReject() {
 
         <div class="mt-6 rounded-xl border border-beige-200 bg-white p-5 shadow-soft">
             <dl class="grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt class="text-charcoal-400">Pelanggan</dt><dd class="font-medium text-charcoal-800">{{ booking.user.name }} ({{ booking.user.email }})</dd></div>
+                <div><dt class="text-charcoal-400">Pelanggan</dt><dd class="font-medium text-charcoal-800">{{ booking.user?.name ?? '(akun dihapus)' }} ({{ booking.user?.email ?? '-' }})</dd></div>
                 <div><dt class="text-charcoal-400">Kamar</dt><dd>{{ booking.room.name ?? `Kamar ${booking.room.room_number}` }} — {{ booking.room.property.name }}</dd></div>
                 <div><dt class="text-charcoal-400">Mulai Sewa</dt><dd>{{ formatDate(booking.start_date) }} ({{ booking.duration_months }} bulan)</dd></div>
                 <div><dt class="text-charcoal-400">Total</dt><dd>{{ formatIdr(booking.total_amount) }}</dd></div>

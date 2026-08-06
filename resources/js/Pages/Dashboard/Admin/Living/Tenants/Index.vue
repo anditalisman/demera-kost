@@ -9,7 +9,7 @@ interface TenantRow {
     id: number;
     status: 'prospective' | 'active' | 'inactive';
     joined_at: string | null;
-    user: { name: string; email: string };
+    user: { name: string; email: string } | null;
     room: { name: string | null; room_number: string; property: { name: string } } | null;
 }
 interface Paginated<T> {
@@ -68,8 +68,8 @@ function applyFilters() {
                 <tbody class="divide-y divide-beige-100">
                     <tr v-for="tenant in tenants.data" :key="tenant.id">
                         <td class="px-4 py-3">
-                            <p class="font-medium text-charcoal-800">{{ tenant.user.name }}</p>
-                            <p class="text-xs text-charcoal-400">{{ tenant.user.email }}</p>
+                            <p class="font-medium text-charcoal-800">{{ tenant.user?.name ?? '(akun dihapus)' }}</p>
+                            <p class="text-xs text-charcoal-400">{{ tenant.user?.email ?? '-' }}</p>
                         </td>
                         <td class="px-4 py-3 text-charcoal-500">
                             <template v-if="tenant.room">{{ tenant.room.name ?? `Kamar ${tenant.room.room_number}` }} &middot; {{ tenant.room.property.name }}</template>

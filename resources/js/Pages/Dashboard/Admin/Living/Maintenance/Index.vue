@@ -9,7 +9,7 @@ interface RequestRow {
     priority: string;
     status: string;
     created_at: string;
-    tenant: { user: { name: string } } | null;
+    tenant: { user: { name: string } | null } | null;
     room: { name: string | null; room_number: string };
 }
 interface Paginated<T> {
@@ -64,7 +64,7 @@ function filterByStatus(status: string) {
                 <tbody class="divide-y divide-beige-100">
                     <tr v-for="req in requests.data" :key="req.id">
                         <td class="px-4 py-3 font-medium text-charcoal-800">{{ req.title }}</td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ req.tenant?.user.name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ req.tenant?.user?.name ?? '-' }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ req.room.name ?? `Kamar ${req.room.room_number}` }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ PRIORITY_LABEL[req.priority] }}</td>
                         <td class="px-4 py-3">

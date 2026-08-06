@@ -38,7 +38,7 @@ interface TenantDetail {
     moved_out_at: string | null;
     emergency_contact_name: string | null;
     emergency_contact_phone: string | null;
-    user: { name: string; email: string; whatsapp_number: string | null };
+    user: { name: string; email: string; whatsapp_number: string | null } | null;
     room: { name: string | null; room_number: string; property: { name: string } } | null;
     booking: { booking_code: string; documents: DocumentRow[] } | null;
     leases: LeaseRow[];
@@ -56,11 +56,11 @@ const LEASE_STATUS_LABEL: Record<string, string> = {
 </script>
 
 <template>
-    <Head :title="`Penyewa — ${tenant.user.name}`" />
+    <Head :title="`Penyewa — ${tenant.user?.name ?? '(akun dihapus)'}`" />
 
     <AdminLayout>
         <div class="flex items-center justify-between">
-            <h1 class="font-display text-2xl font-semibold text-charcoal-800">{{ tenant.user.name }}</h1>
+            <h1 class="font-display text-2xl font-semibold text-charcoal-800">{{ tenant.user?.name ?? '(akun dihapus)' }}</h1>
             <Link :href="route('admin.tenants.index')" class="text-sm text-charcoal-500 hover:underline">Kembali</Link>
         </div>
 
@@ -69,8 +69,8 @@ const LEASE_STATUS_LABEL: Record<string, string> = {
                 <h2 class="font-display text-sm font-semibold uppercase tracking-wide text-charcoal-500">Info Penyewa</h2>
                 <dl class="mt-3 space-y-2 text-sm">
                     <div><dt class="text-charcoal-400">Status</dt><dd class="font-medium text-charcoal-800">{{ STATUS_LABEL[tenant.status] }}</dd></div>
-                    <div><dt class="text-charcoal-400">Email</dt><dd>{{ tenant.user.email }}</dd></div>
-                    <div><dt class="text-charcoal-400">WhatsApp</dt><dd>{{ tenant.user.whatsapp_number ?? '-' }}</dd></div>
+                    <div><dt class="text-charcoal-400">Email</dt><dd>{{ tenant.user?.email ?? '-' }}</dd></div>
+                    <div><dt class="text-charcoal-400">WhatsApp</dt><dd>{{ tenant.user?.whatsapp_number ?? '-' }}</dd></div>
                     <div><dt class="text-charcoal-400">Kamar Saat Ini</dt><dd>{{ tenant.room ? (tenant.room.name ?? `Kamar ${tenant.room.room_number}`) + ' — ' + tenant.room.property.name : '-' }}</dd></div>
                     <div><dt class="text-charcoal-400">Bergabung</dt><dd>{{ formatDate(tenant.joined_at) }}</dd></div>
                     <div v-if="tenant.moved_out_at"><dt class="text-charcoal-400">Keluar</dt><dd>{{ formatDate(tenant.moved_out_at) }}</dd></div>

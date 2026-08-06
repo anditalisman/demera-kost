@@ -13,7 +13,7 @@ interface LeaseRow {
     start_date: string;
     end_date: string;
     monthly_price: string;
-    tenant: { user: { name: string } };
+    tenant: { user: { name: string } | null };
     room: { name: string | null; room_number: string; property: { name: string } };
 }
 interface Paginated<T> {
@@ -67,7 +67,7 @@ function applyFilters() {
                 <tbody class="divide-y divide-beige-100">
                     <tr v-for="lease in leases.data" :key="lease.id">
                         <td class="px-4 py-3 font-medium text-charcoal-800">{{ lease.lease_number }}</td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ lease.tenant.user.name }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ lease.tenant.user?.name ?? '(akun dihapus)' }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ lease.room.name ?? `Kamar ${lease.room.room_number}` }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ formatDate(lease.start_date) }} s.d. {{ formatDate(lease.end_date) }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ formatIdr(lease.monthly_price) }}</td>

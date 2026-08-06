@@ -31,7 +31,7 @@ interface LeaseDetail {
     monthly_price: string;
     deposit_amount: string;
     billing_cycle_day: number;
-    tenant: { user: { name: string; email: string } };
+    tenant: { user: { name: string; email: string } | null };
     room: { name: string | null; room_number: string; property: { name: string } };
     extensions: ExtensionRow[];
     deposits: DepositRow[];
@@ -76,7 +76,7 @@ function submitTerminate() {
 
         <div class="mt-6 rounded-xl border border-beige-200 bg-white p-5 shadow-soft">
             <dl class="grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt class="text-charcoal-400">Penyewa</dt><dd class="font-medium text-charcoal-800">{{ lease.tenant.user.name }}</dd></div>
+                <div><dt class="text-charcoal-400">Penyewa</dt><dd class="font-medium text-charcoal-800">{{ lease.tenant.user?.name ?? '(akun dihapus)' }}</dd></div>
                 <div><dt class="text-charcoal-400">Kamar</dt><dd>{{ lease.room.name ?? `Kamar ${lease.room.room_number}` }} — {{ lease.room.property.name }}</dd></div>
                 <div><dt class="text-charcoal-400">Periode</dt><dd>{{ formatDate(lease.start_date) }} s.d. {{ formatDate(lease.end_date) }} ({{ lease.duration_months }} bulan)</dd></div>
                 <div><dt class="text-charcoal-400">Harga/Bulan</dt><dd>{{ formatIdr(lease.monthly_price) }}</dd></div>

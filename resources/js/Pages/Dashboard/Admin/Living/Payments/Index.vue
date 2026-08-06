@@ -19,8 +19,8 @@ interface PaymentRow {
     created_at: string;
     invoice: {
         invoice_number: string;
-        booking: { user: { name: string } } | null;
-        tenant: { user: { name: string } } | null;
+        booking: { user: { name: string } | null } | null;
+        tenant: { user: { name: string } | null } | null;
     };
 }
 interface Paginated<T> {
@@ -57,7 +57,7 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 function customerName(payment: PaymentRow): string {
-    return payment.invoice.booking?.user.name ?? payment.invoice.tenant?.user.name ?? '-';
+    return payment.invoice.booking?.user?.name ?? payment.invoice.tenant?.user?.name ?? '-';
 }
 
 function filterByStatus(status: string) {

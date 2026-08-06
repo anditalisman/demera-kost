@@ -13,7 +13,7 @@ interface CommentRow {
     id: number;
     comment: string;
     created_at: string;
-    user: { name: string };
+    user: { name: string } | null;
 }
 interface MaintenanceDetail {
     id: number;
@@ -24,7 +24,7 @@ interface MaintenanceDetail {
     status: string;
     resolution_notes: string | null;
     created_at: string;
-    tenant: { user: { name: string; email: string } } | null;
+    tenant: { user: { name: string; email: string } | null } | null;
     room: { name: string | null; room_number: string; property: { name: string } };
     attachments: AttachmentRow[];
     comments: CommentRow[];
@@ -60,7 +60,7 @@ function submitComment() {
             <div class="lg:col-span-2 space-y-6">
                 <div class="rounded-xl border border-beige-200 bg-white p-5 shadow-soft">
                     <p class="text-sm text-charcoal-500">
-                        Dilaporkan oleh {{ maintenanceRequest.tenant?.user.name ?? '-' }} &middot;
+                        Dilaporkan oleh {{ maintenanceRequest.tenant?.user?.name ?? '-' }} &middot;
                         {{ maintenanceRequest.room.name ?? `Kamar ${maintenanceRequest.room.room_number}` }},
                         {{ maintenanceRequest.room.property.name }}
                     </p>
@@ -77,7 +77,7 @@ function submitComment() {
                     <h2 class="font-display text-sm font-semibold uppercase tracking-wide text-charcoal-500">Diskusi</h2>
                     <ul class="mt-3 space-y-3">
                         <li v-for="c in maintenanceRequest.comments" :key="c.id" class="rounded-lg bg-cream-50 p-3 text-sm">
-                            <p class="font-medium text-charcoal-800">{{ c.user.name }}</p>
+                            <p class="font-medium text-charcoal-800">{{ c.user?.name ?? '(akun dihapus)' }}</p>
                             <p class="mt-1 text-charcoal-600">{{ c.comment }}</p>
                             <p class="mt-1 text-xs text-charcoal-400">{{ c.created_at }}</p>
                         </li>

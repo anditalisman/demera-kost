@@ -13,8 +13,8 @@ interface InvoiceRow {
     total_amount: string;
     paid_amount: string;
     due_date: string;
-    booking: { user: { name: string } } | null;
-    tenant: { user: { name: string } } | null;
+    booking: { user: { name: string } | null } | null;
+    tenant: { user: { name: string } | null } | null;
 }
 interface Paginated<T> {
     data: T[];
@@ -43,7 +43,7 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 function customerName(invoice: InvoiceRow): string {
-    return invoice.booking?.user.name ?? invoice.tenant?.user.name ?? '-';
+    return invoice.booking?.user?.name ?? invoice.tenant?.user?.name ?? '-';
 }
 
 function filterByStatus(status: string) {

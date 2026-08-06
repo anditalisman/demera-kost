@@ -10,7 +10,7 @@ interface BookingRow {
     status: string;
     total_amount: string;
     payment_due_at: string | null;
-    user: { name: string };
+    user: { name: string } | null;
     room: { name: string | null; room_number: string; property: { name: string } };
 }
 interface Paginated<T> {
@@ -68,7 +68,7 @@ function filterByStatus(status: string) {
                 <tbody class="divide-y divide-beige-100">
                     <tr v-for="booking in bookings.data" :key="booking.id">
                         <td class="px-4 py-3 font-medium text-charcoal-800">{{ booking.booking_code }}</td>
-                        <td class="px-4 py-3 text-charcoal-500">{{ booking.user.name }}</td>
+                        <td class="px-4 py-3 text-charcoal-500">{{ booking.user?.name ?? '(akun dihapus)' }}</td>
                         <td class="px-4 py-3 text-charcoal-500">{{ booking.room.name ?? `Kamar ${booking.room.room_number}` }}</td>
                         <td class="px-4 py-3 text-charcoal-600">{{ formatIdr(booking.total_amount) }}</td>
                         <td class="px-4 py-3">

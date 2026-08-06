@@ -12,7 +12,7 @@ interface CommentRow {
     id: number;
     comment: string;
     created_at: string;
-    user: { name: string };
+    user: { name: string } | null;
 }
 interface MaintenanceDetail {
     id: number;
@@ -59,7 +59,7 @@ function submitComment() {
                 <h2 class="font-display text-lg font-semibold text-charcoal-800">Diskusi</h2>
                 <ul class="mt-3 space-y-3">
                     <li v-for="c in maintenanceRequest.comments" :key="c.id" class="rounded-lg bg-cream-50 p-3 text-sm">
-                        <p class="font-medium text-charcoal-800">{{ c.user.name }}</p>
+                        <p class="font-medium text-charcoal-800">{{ c.user?.name ?? '(akun dihapus)' }}</p>
                         <p class="mt-1 text-charcoal-600">{{ c.comment }}</p>
                         <p class="mt-1 text-xs text-charcoal-400">{{ formatDateTime(c.created_at) }}</p>
                     </li>
