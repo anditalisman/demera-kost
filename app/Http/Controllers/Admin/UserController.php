@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Domain\Platform\Services\AuditLogger;
+use App\Enums\BookingStatus;
+use App\Enums\TenantStatus;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -84,6 +86,15 @@ class UserController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         $this->authorize('delete', $user);
+
+        if ($user->tenant()->where('status', TenantStatus::Active)->exists()) {
+            return back()->with('error', "{$user->name} masih berstatus penyewa aktif. Nonaktifkan atau pindahkan status penyewanya terlebih dahulu sebelum menghapus akun.");
+        }
+
+        $ongoingBookingStatuses = [BookingStatus::Pending, BookingStatus::AwaitingPayment, BookingStatus::Confirmed];
+        if ($user->bookings()->whereIn('status', $ongoingBookingStatuses)->exists()) {
+            return back()->with('error', "{$user->name} masih memiliki booking yang sedang berjalan. Selesaikan atau batalkan booking tersebut terlebih dahulu sebelum menghapus akun.");
+        }
 
         $name = $user->name;
 

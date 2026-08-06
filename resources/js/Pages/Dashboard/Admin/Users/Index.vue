@@ -75,7 +75,10 @@ function confirmDelete(user: UserRow) {
 function destroyUser() {
     if (!deleting.value) return;
     deleteForm.delete(route('admin.users.destroy', deleting.value.id), {
-        onSuccess: () => (deleting.value = null),
+        // Close on completion either way — the modal overlay hides the page's
+        // flash message banner, so an error response would otherwise leave
+        // the user staring at a still-open modal with no visible explanation.
+        onFinish: () => (deleting.value = null),
     });
 }
 </script>
