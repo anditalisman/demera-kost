@@ -41,12 +41,13 @@ services:
       - traefik.docker.network=dokploy-network
       - traefik.http.routers.demera-smtp-cert-web.rule=Host(`${MAIL_HOSTNAME:-smtp.demera.my.id}`)
       - traefik.http.routers.demera-smtp-cert-web.entrypoints=web
-      - traefik.http.routers.demera-smtp-cert-web.service=demera-smtp-cert
-      - traefik.http.routers.demera-smtp-cert.rule=Host(`${MAIL_HOSTNAME:-smtp.demera.my.id}`)
-      - traefik.http.routers.demera-smtp-cert.entrypoints=websecure
-      - traefik.http.routers.demera-smtp-cert.service=demera-smtp-cert
-      - traefik.http.routers.demera-smtp-cert.tls.certresolver=letsencrypt
-      - traefik.http.services.demera-smtp-cert.loadbalancer.server.port=80
+      - traefik.http.routers.demera-smtp-cert-web.service=demera-smtp-cert-web
+      - traefik.http.services.demera-smtp-cert-web.loadbalancer.server.port=80
+      - traefik.http.routers.demera-smtp-cert-websecure.rule=Host(`${MAIL_HOSTNAME:-smtp.demera.my.id}`)
+      - traefik.http.routers.demera-smtp-cert-websecure.entrypoints=websecure
+      - traefik.http.routers.demera-smtp-cert-websecure.tls.certresolver=letsencrypt
+      - traefik.http.routers.demera-smtp-cert-websecure.service=demera-smtp-cert-websecure
+      - traefik.http.services.demera-smtp-cert-websecure.loadbalancer.server.port=80
       - traefik.enable=true
     depends_on:
       - app
