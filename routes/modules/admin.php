@@ -127,6 +127,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
     Route::put('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
+    Route::get('/booking-documents/{bookingDocument}', [BookingController::class, 'document'])->name('booking-documents.show');
 
     Route::get('/maintenance-requests', [MaintenanceController::class, 'index'])->name('maintenance-requests.index');
     Route::get('/maintenance-requests/{maintenanceRequest}', [MaintenanceController::class, 'show'])->name('maintenance-requests.show');

@@ -15,6 +15,11 @@ interface GuestRow {
     full_name: string;
     is_primary: boolean;
 }
+interface DocumentRow {
+    id: number;
+    document_type: string;
+    original_filename: string;
+}
 interface BookingDetail {
     id: number;
     booking_code: string;
@@ -26,6 +31,7 @@ interface BookingDetail {
     user: { name: string; email: string } | null;
     room: { name: string | null; room_number: string; property: { name: string } };
     guests: GuestRow[];
+    documents: DocumentRow[];
     invoices: { id: number; invoice_number: string; status: string; total_amount: string }[];
 }
 
@@ -35,6 +41,7 @@ const STATUS_LABEL: Record<string, string> = {
     pending: 'Menunggu Diproses', awaiting_payment: 'Menunggu Pembayaran', confirmed: 'Terkonfirmasi',
     expired: 'Kedaluwarsa', cancelled: 'Dibatalkan', converted_to_lease: 'Menjadi Kontrak Sewa',
 };
+const DOCUMENT_TYPE_LABEL: Record<string, string> = { ktp: 'KTP' };
 const canDecide = props.booking.status === 'awaiting_payment' || props.booking.status === 'pending';
 
 function approve() {
@@ -73,6 +80,18 @@ function submitReject() {
                 <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal-500">Penghuni</h3>
                 <ul class="mt-2 text-sm text-charcoal-600">
                     <li v-for="g in booking.guests" :key="g.id">{{ g.full_name }}<span v-if="g.is_primary" class="text-xs text-terracotta-500"> (Utama)</span></li>
+                </ul>
+            </div>
+
+            <div class="mt-4 border-t border-beige-100 pt-4">
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal-500">Dokumen Identitas</h3>
+                <ul class="mt-2 space-y-1 text-sm">
+                    <li v-for="doc in booking.documents" :key="doc.id">
+                        <a :href="route('admin.booking-documents.show', doc.id)" target="_blank" class="text-terracotta-600 hover:underline">
+                            {{ DOCUMENT_TYPE_LABEL[doc.document_type] ?? doc.document_type }} — {{ doc.original_filename }}
+                        </a>
+                    </li>
+                    <li v-if="booking.documents.length === 0" class="text-charcoal-400">Belum ada dokumen diunggah.</li>
                 </ul>
             </div>
 

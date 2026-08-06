@@ -53,6 +53,7 @@ const LEASE_STATUS_LABEL: Record<string, string> = {
     draft: 'Draft', pending_approval: 'Menunggu Persetujuan', active: 'Aktif', ending_soon: 'Akan Berakhir',
     completed: 'Selesai', cancelled: 'Dibatalkan', extended: 'Diperpanjang',
 };
+const DOCUMENT_TYPE_LABEL: Record<string, string> = { ktp: 'KTP' };
 </script>
 
 <template>
@@ -80,7 +81,11 @@ const LEASE_STATUS_LABEL: Record<string, string> = {
                 <div v-if="tenant.booking" class="mt-4 border-t border-beige-100 pt-4">
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-charcoal-500">Dokumen Identitas</h3>
                     <ul class="mt-2 space-y-1 text-sm text-charcoal-600">
-                        <li v-for="doc in tenant.booking.documents" :key="doc.id">{{ doc.document_type }} — {{ doc.original_filename }}</li>
+                        <li v-for="doc in tenant.booking.documents" :key="doc.id">
+                            <a :href="route('admin.booking-documents.show', doc.id)" target="_blank" class="text-terracotta-600 hover:underline">
+                                {{ DOCUMENT_TYPE_LABEL[doc.document_type] ?? doc.document_type }} — {{ doc.original_filename }}
+                            </a>
+                        </li>
                         <li v-if="tenant.booking.documents.length === 0" class="text-xs text-charcoal-400">Tidak ada dokumen.</li>
                     </ul>
                 </div>

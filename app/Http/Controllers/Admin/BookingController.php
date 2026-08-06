@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Domain\Living\Models\Booking;
+use App\Domain\Living\Models\BookingDocument;
 use App\Domain\Living\Services\BookingLifecycleService;
+use App\Domain\Platform\Services\PrivateDocumentUrlService;
 use App\Enums\BookingStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\RoomStatus;
@@ -67,6 +69,15 @@ class BookingController extends Controller
         $this->bookingLifecycleService->confirm($booking, request()->user());
 
         return back()->with('success', 'Booking berhasil disetujui secara manual.');
+    }
+
+    public function document(BookingDocument $bookingDocument, PrivateDocumentUrlService $urlService): RedirectResponse
+    {
+        $this->authorize('view', $bookingDocument->booking);
+
+        abort_if(! $bookingDocument->file_path, 404);
+
+        return redirect()->away($urlService->temporaryUrl($bookingDocument->file_path));
     }
 
     public function reject(Request $request, Booking $booking): RedirectResponse
