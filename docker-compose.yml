@@ -165,7 +165,7 @@ services:
     cap_add:
       - NET_ADMIN
     healthcheck:
-      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      test: ["CMD", "nc", "-z", "-w1", "127.0.0.1", "25"]
       interval: 10s
       timeout: 10s
       retries: 10
