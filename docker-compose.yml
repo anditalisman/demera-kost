@@ -197,12 +197,12 @@ services:
       - "host.docker.internal:host-gateway"
     labels:
       - traefik.docker.network=dokploy-network
-      - traefik.http.routers.demera-webmail-web.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-webmail.demera.my.id}`)
+      - traefik.http.routers.demera-webmail-web.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-mail.demera.my.id}`)
       - traefik.http.routers.demera-webmail-web.entrypoints=web
       - traefik.http.services.demera-webmail-web.loadbalancer.server.port=80
       - traefik.http.routers.demera-webmail-web.service=demera-webmail-web
       - traefik.http.routers.demera-webmail-web.middlewares=redirect-to-https@file
-      - traefik.http.routers.demera-webmail-websecure.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-webmail.demera.my.id}`)
+      - traefik.http.routers.demera-webmail-websecure.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-mail.demera.my.id}`)
       - traefik.http.routers.demera-webmail-websecure.entrypoints=websecure
       - traefik.http.services.demera-webmail-websecure.loadbalancer.server.port=80
       - traefik.http.routers.demera-webmail-websecure.service=demera-webmail-websecure

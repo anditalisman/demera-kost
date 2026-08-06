@@ -66,7 +66,7 @@ cepat, SMTP relay (Mailgun, dsb) jauh lebih reliable tanpa setup DNS ini.
 | Tipe | Host | Value | Keterangan |
 |---|---|---|---|
 | A | `smtp` (atau sesuai `MAIL_HOSTNAME`) | IP server ini | Wajib, dipakai untuk HELO/EHLO & sertifikat |
-| A | `webmail` (atau sesuai `MAIL_WEBMAIL_DOMAIN`) | IP server ini | Untuk akses Roundcube via Traefik |
+| A | `mail` (atau sesuai `MAIL_WEBMAIL_DOMAIN`) | IP server ini | Untuk akses Roundcube via Traefik |
 | MX | `@` (root domain) | `smtp.demera.my.id` (prioritas 10) | Supaya domain bisa menerima email masuk |
 | TXT (SPF) | `@` | `v=spf1 mx ~all` | Menyatakan server MX ini boleh kirim atas nama domain |
 | TXT (DKIM) | `mail._domainkey` | (lihat cara ambil di bawah) | Tanda tangan digital email |
