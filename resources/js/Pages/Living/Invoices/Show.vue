@@ -102,7 +102,7 @@ const displayStatusLabel = computed(() =>
             </div>
 
             <Link v-if="canPay" :href="route('payments.create', invoice.id)">
-                <PrimaryButton class="mt-6 w-full justify-center sm:w-auto">Bayar Sekarang</PrimaryButton>
+                <PrimaryButton class="mt-6 w-full justify-center sm:w-auto">{{ hasPendingPayment ? 'Ubah Bukti Pembayaran' : 'Bayar Sekarang' }}</PrimaryButton>
             </Link>
 
             <div v-if="invoice.payments.length" class="mt-8 border-t border-beige-100 pt-6">

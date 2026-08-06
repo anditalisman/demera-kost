@@ -28,13 +28,40 @@ class PaymentVerificationService
         private readonly NotificationDispatcher $notificationDispatcher,
     ) {}
 
+    /**
+     * A pending payment (still awaiting admin review) is replaced in place
+     * rather than duplicated — re-uploading proof updates the same record's
+     * file instead of creating a second one for the admin to review. Once a
+     * payment is rejected (failed) or verified (paid), it's no longer
+     * "pending" and the next submission starts a genuinely new one, so a
+     * rejected attempt always requires a fresh upload rather than silently
+     * reusing the rejected file.
+     */
     public function submitProof(Invoice $invoice, PaymentMethod $method, UploadedFile $proof): Payment
     {
         if (in_array($invoice->status, [InvoiceStatus::Paid, InvoiceStatus::Cancelled, InvoiceStatus::Refunded], true)) {
             throw new \RuntimeException('Invoice ini sudah tidak dapat menerima pembayaran.');
         }
 
+        $pending = $invoice->payments()->where('status', PaymentStatus::Pending)->first();
+
         $uploaded = $this->documentUploadService->upload($proof, 'payment-proofs');
+
+        if ($pending) {
+            $previousPath = $pending->proof_file_path;
+
+            $pending->update([
+                'method' => $method,
+                'amount' => $invoice->remainingAmount(),
+                'proof_file_path' => $uploaded['path'],
+            ]);
+
+            if ($previousPath && $previousPath !== $uploaded['path']) {
+                $this->documentUploadService->delete($previousPath);
+            }
+
+            return $pending->fresh();
+        }
 
         return $invoice->payments()->create([
             'payment_code' => $this->generateCode(),

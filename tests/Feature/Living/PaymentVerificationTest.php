@@ -90,6 +90,29 @@ class PaymentVerificationTest extends TestCase
         $this->assertSame(RoomStatus::Occupied, $room->fresh()->status);
     }
 
+    public function test_resubmitting_proof_while_pending_replaces_it_instead_of_duplicating(): void
+    {
+        Storage::fake('private_documents');
+        $customer = $this->customer();
+        $room = Room::factory()->create(['status' => RoomStatus::Available]);
+        $booking = app(BookingLifecycleService::class)->createHold($customer, $room, $this->bookingData());
+        $invoice = $booking->invoices->first();
+
+        $first = app(PaymentVerificationService::class)->submitProof(
+            $invoice, PaymentMethod::ManualTransfer, UploadedFile::fake()->create('bukti1.jpg', 200, 'image/jpeg'),
+        );
+
+        $second = app(PaymentVerificationService::class)->submitProof(
+            $invoice, PaymentMethod::Qris, UploadedFile::fake()->create('bukti2.jpg', 200, 'image/jpeg'),
+        );
+
+        $this->assertSame(1, $invoice->payments()->count());
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame(PaymentMethod::Qris, $second->fresh()->method);
+        $this->assertNotSame($first->proof_file_path, $second->proof_file_path);
+        Storage::disk('private_documents')->assertMissing($first->proof_file_path);
+    }
+
     public function test_rejecting_a_payment_allows_resubmission(): void
     {
         Storage::fake('private_documents');
