@@ -14,30 +14,14 @@ class PrivateDocumentUrlService
 {
     public function temporaryUrl(string $path, int $expiresInMinutes = 10): string
     {
-        $url = Storage::disk('private_documents')->temporaryUrl(
+        // Signed against the "private_documents_signed" disk (public-facing
+        // endpoint) rather than "private_documents" (internal endpoint) —
+        // AWS SigV4 signs the Host header itself, so a URL generated for one
+        // host and then rewritten to another fails signature validation the
+        // moment a browser actually requests it. See filesystems.php.
+        return Storage::disk('private_documents_signed')->temporaryUrl(
             $path,
             now()->addMinutes($expiresInMinutes),
         );
-
-        return $this->rewriteForBrowserAccess($url);
-    }
-
-    /**
-     * In local/dev, the app talks to MinIO via its internal Docker hostname
-     * (e.g. http://minio:9000), but presigned URLs must be reachable from the
-     * user's browser. Rewrite the host portion to the public-facing endpoint
-     * when the two differ; in production (real S3) this is a no-op because
-     * OBJECT_STORAGE_ENDPOINT_PUBLIC_URL is left empty.
-     */
-    private function rewriteForBrowserAccess(string $url): string
-    {
-        $internalEndpoint = config('filesystems.disks.private_documents.endpoint');
-        $publicEndpoint = env('OBJECT_STORAGE_ENDPOINT_PUBLIC_URL');
-
-        if (empty($internalEndpoint) || empty($publicEndpoint) || $internalEndpoint === $publicEndpoint) {
-            return $url;
-        }
-
-        return str_replace($internalEndpoint, rtrim($publicEndpoint, '/'), $url);
     }
 }

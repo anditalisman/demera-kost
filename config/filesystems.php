@@ -92,6 +92,28 @@ return [
             'report' => false,
         ],
 
+        // Same bucket as "private_documents", but signs URLs against the
+        // public-facing endpoint instead of the internal one. AWS SigV4
+        // includes "host" in what gets signed (X-Amz-SignedHeaders=host) —
+        // generating on "private_documents" and then string-replacing the
+        // host in the resulting URL (the old approach) produces a URL whose
+        // Host no longer matches what was signed, so MinIO/S3 rejects it
+        // with 403 the moment a browser actually requests it. Used only by
+        // PrivateDocumentUrlService::temporaryUrl(); regular reads/writes
+        // still go through "private_documents" internally.
+        'private_documents_signed' => [
+            'driver' => 's3',
+            'key' => env('OBJECT_STORAGE_KEY'),
+            'secret' => env('OBJECT_STORAGE_SECRET'),
+            'region' => env('OBJECT_STORAGE_REGION', 'us-east-1'),
+            'bucket' => env('OBJECT_STORAGE_BUCKET_PRIVATE', 'demera-private'),
+            'endpoint' => env('OBJECT_STORAGE_ENDPOINT_PUBLIC_URL', env('OBJECT_STORAGE_ENDPOINT')),
+            'use_path_style_endpoint' => env('OBJECT_STORAGE_USE_PATH_STYLE', true),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*

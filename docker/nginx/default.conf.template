@@ -50,11 +50,21 @@ server {
     # over that path, regardless of headers/credentials, while the exact same
     # request succeeds over any single network or via the host. Routing
     # through the host side-steps that overlay+bridge interaction entirely.
+    #
+    # proxy_set_header Host $host is required for /demera-private/: presigned
+    # URLs are AWS SigV4-signed against this public hostname (see
+    # filesystems.php's "private_documents_signed" disk), and SigV4 signs the
+    # Host header itself — nginx's default of forwarding the proxy target's
+    # own host:port instead of the original Host causes MinIO to recompute a
+    # different signature than the client sent and reject with 403, even
+    # though the URL itself is otherwise valid and unexpired.
     location ^~ /demera-public/ {
+        proxy_set_header Host $host;
         proxy_pass http://host.docker.internal:${MINIO_API_PORT}/demera-public/;
     }
 
     location ^~ /demera-private/ {
+        proxy_set_header Host $host;
         proxy_pass http://host.docker.internal:${MINIO_API_PORT}/demera-private/;
     }
 
