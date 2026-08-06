@@ -182,19 +182,23 @@ services:
     container_name: demera_webmail
     restart: unless-stopped
     environment:
-      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://host.docker.internal
+      # 10.20.31.1 is the gateway of the "default" network below (a container
+      # on a Docker bridge network can always reach the host through its
+      # gateway IP, which routes to the host's published ports) — NOT
+      # host.docker.internal: that resolves to the system default bridge's
+      # gateway (172.17.0.1) regardless of which networks this container is
+      # actually on, and this container was never attached to that network,
+      # so connections to it silently failed ("Connection to storage server
+      # failed" in Roundcube). Confirmed working directly before wiring it
+      # in. See mailserver's network comment for why this goes via the host
+      # at all instead of the internal "demera" network.
+      - ROUNDCUBEMAIL_DEFAULT_HOST=ssl://10.20.31.1
       - ROUNDCUBEMAIL_DEFAULT_PORT=${MAIL_IMAPS_PORT:-993}
-      - ROUNDCUBEMAIL_SMTP_SERVER=tls://host.docker.internal
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://10.20.31.1
       - ROUNDCUBEMAIL_SMTP_PORT=${MAIL_SUBMISSION_PORT:-587}
       - ROUNDCUBEMAIL_DB_TYPE=sqlite
     volumes:
       - webmail_data:/var/roundcube/db
-    # Reaches mailserver via the host's published ports (see mailserver's
-    # network comment above) instead of the internal "demera" network, since
-    # this container needs dokploy-network for Traefik and mixing the two
-    # network types breaks connectivity to "demera" peers.
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     labels:
       - traefik.docker.network=dokploy-network
       - traefik.http.routers.demera-webmail-web.rule=Host(`${MAIL_WEBMAIL_DOMAIN:-mail.demera.my.id}`)
@@ -210,6 +214,7 @@ services:
       - traefik.enable=true
     networks:
       - dokploy-network
+      - default
     depends_on:
       - mailserver
 
