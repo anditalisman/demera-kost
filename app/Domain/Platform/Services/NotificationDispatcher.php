@@ -6,7 +6,6 @@ use App\Domain\Platform\Models\Notification;
 use App\Domain\Platform\Models\NotificationLog;
 use App\Domain\Platform\Models\NotificationTemplate;
 use App\Domain\Platform\Services\Notifications\LogEmailDriver;
-use App\Domain\Platform\Services\Notifications\LogWhatsAppDriver;
 use App\Domain\Platform\Services\Notifications\NotificationChannelDriver;
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationDeliveryStatus;
@@ -16,16 +15,17 @@ use App\Models\User;
  * Central entry point for sending a notification. Every dispatch always
  * creates an in-app Notification (the always-on channel) plus a matching
  * NotificationLog; if the template targets email/WhatsApp, the relevant
- * driver additionally logs its own delivery attempt. Real providers are
- * swapped in later by replacing the driver bindings below — nothing about
- * this dispatch contract changes.
+ * driver additionally logs its own delivery attempt. The WhatsApp driver is
+ * resolved through the NotificationChannelDriver interface — AppServiceProvider
+ * binds it to LogWhatsAppDriver or OpenWaDriver based on services.whatsapp.provider
+ * (WHATSAPP_PROVIDER env) — so switching providers never touches this class.
  */
 class NotificationDispatcher
 {
     /** @var array<string, NotificationChannelDriver> */
     private array $drivers;
 
-    public function __construct(LogWhatsAppDriver $whatsAppDriver, LogEmailDriver $emailDriver)
+    public function __construct(NotificationChannelDriver $whatsAppDriver, LogEmailDriver $emailDriver)
     {
         $this->drivers = [
             NotificationChannel::Whatsapp->value => $whatsAppDriver,

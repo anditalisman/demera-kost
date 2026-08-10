@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,7 +32,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('verification.whatsapp.notice', absolute: false));
         $this->assertTrue($this->app['auth']->user()->hasRole('customer'));
     }
 
@@ -55,7 +56,7 @@ class RegistrationTest extends TestCase
     {
         $this->seed(RolePermissionSeeder::class);
 
-        \App\Models\User::factory()->create(['whatsapp_number' => '081234567890']);
+        User::factory()->create(['whatsapp_number' => '081234567890']);
 
         $response = $this->post('/register', [
             'name' => 'Test User',
