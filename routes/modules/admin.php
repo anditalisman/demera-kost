@@ -135,7 +135,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::post('/maintenance-requests/{maintenanceRequest}/comments', [MaintenanceController::class, 'storeComment'])->name('maintenance-requests.comments.store');
 });
 
-Route::middleware(['auth', 'verified'])->prefix('account')->name('customer.')->group(function () {
+Route::middleware(['auth', 'account.verified'])->prefix('account')->name('customer.')->group(function () {
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard/Customer/Dashboard');
     })->name('dashboard');

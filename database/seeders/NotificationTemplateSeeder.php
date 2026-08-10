@@ -19,6 +19,13 @@ class NotificationTemplateSeeder extends Seeder
                 'body_template' => 'Halo {{name}}, kode verifikasi WhatsApp Anda: {{otp_code}}. Berlaku {{ttl_minutes}} menit. Jangan bagikan kode ini kepada siapa pun.',
             ],
             [
+                'code' => 'email_verification_reminder',
+                'name' => 'Pengingat Verifikasi Email',
+                'channel' => NotificationChannel::InApp,
+                'subject' => 'Verifikasi email Anda',
+                'body_template' => 'Nomor WhatsApp Anda sudah terverifikasi. Jangan lupa verifikasi email {{email}} juga lewat tautan yang kami kirimkan, ya.',
+            ],
+            [
                 'code' => 'booking_confirmed',
                 'name' => 'Pemesanan Dikonfirmasi',
                 'channel' => NotificationChannel::Email,
