@@ -50,7 +50,10 @@ class BookingLifecycleService
             $holdHours = (int) ApplicationSetting::get('booking_hold_hours', 24);
             $adminFee = (float) ApplicationSetting::get('booking_admin_fee', 0);
             $monthlyPrice = (float) $lockedRoom->monthly_price;
-            $depositAmount = (float) $lockedRoom->deposit_amount;
+            // Conscious decision: no deposit is charged on new bookings — the tenant pays the
+            // room price directly. Room.deposit_amount / RoomType.base_deposit and the Deposit
+            // refund-tracking model stay in place for leases created before this decision.
+            $depositAmount = 0.0;
             $totalAmount = $monthlyPrice + $depositAmount + $adminFee;
 
             $booking = Booking::create([
@@ -110,7 +113,10 @@ class BookingLifecycleService
             ]);
 
             $invoice->items()->create(['label' => 'Sewa Bulan Pertama', 'item_type' => 'rent', 'quantity' => 1, 'unit_price' => $monthlyPrice, 'amount' => $monthlyPrice]);
-            $invoice->items()->create(['label' => 'Deposit', 'item_type' => 'deposit', 'quantity' => 1, 'unit_price' => $depositAmount, 'amount' => $depositAmount]);
+
+            if ($depositAmount > 0) {
+                $invoice->items()->create(['label' => 'Deposit', 'item_type' => 'deposit', 'quantity' => 1, 'unit_price' => $depositAmount, 'amount' => $depositAmount]);
+            }
 
             if ($adminFee > 0) {
                 $invoice->items()->create(['label' => 'Biaya Admin', 'item_type' => 'admin_fee', 'quantity' => 1, 'unit_price' => $adminFee, 'amount' => $adminFee]);
@@ -197,13 +203,15 @@ class BookingLifecycleService
                 'approved_at' => now(),
             ]);
 
-            Deposit::create([
-                'tenant_id' => $tenant->id,
-                'lease_id' => $lease->id,
-                'amount' => $locked->deposit_amount,
-                'status' => DepositStatus::Held,
-                'held_at' => now()->toDateString(),
-            ]);
+            if ((float) $locked->deposit_amount > 0) {
+                Deposit::create([
+                    'tenant_id' => $tenant->id,
+                    'lease_id' => $lease->id,
+                    'amount' => $locked->deposit_amount,
+                    'status' => DepositStatus::Held,
+                    'held_at' => now()->toDateString(),
+                ]);
+            }
 
             $room = Room::query()->lockForUpdate()->find($locked->room_id);
 

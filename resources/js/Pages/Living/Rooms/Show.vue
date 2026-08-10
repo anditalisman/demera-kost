@@ -151,10 +151,9 @@ function prevImage() {
                         </p>
 
                         <dl class="mt-4 space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <dt class="text-charcoal-500">Deposit</dt>
-                                <dd class="font-medium text-charcoal-800">{{ formatIdr(room.deposit_amount) }}</dd>
-                            </div>
+                            <!-- No deposit line: bookings are never charged a deposit
+                                 (see BookingLifecycleService::createHold()), so the
+                                 room's raw deposit_amount field isn't shown here. -->
                             <div v-for="fee in room.additional_fees ?? []" :key="fee.label" class="flex justify-between">
                                 <dt class="text-charcoal-500">{{ fee.label }}</dt>
                                 <dd class="font-medium text-charcoal-800">{{ formatIdr(fee.amount) }}</dd>
