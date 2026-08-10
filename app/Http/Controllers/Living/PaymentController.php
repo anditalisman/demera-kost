@@ -57,7 +57,7 @@ class PaymentController extends Controller
             return back()->withErrors(['proof' => $e->getMessage()]);
         }
 
-        return back()->with('success', 'Bukti pembayaran berhasil diunggah. Admin akan segera memverifikasi.');
+        return redirect()->route('dashboard')->with('success', 'Bukti pembayaran berhasil diunggah. Admin akan segera memverifikasi.');
     }
 
     public function receipt(Payment $payment): HttpResponse
