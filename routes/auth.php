@@ -11,6 +11,9 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\VerifyWhatsappController;
+use App\Http\Controllers\Auth\VerifyWhatsappPromptController;
+use App\Http\Controllers\Auth\WhatsappVerificationNotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -48,6 +51,17 @@ Route::middleware('auth')->group(function () {
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+
+    Route::get('verify-whatsapp', VerifyWhatsappPromptController::class)
+        ->name('verification.whatsapp.notice');
+
+    Route::post('verify-whatsapp', [VerifyWhatsappController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.whatsapp.verify');
+
+    Route::post('whatsapp/verification-notification', [WhatsappVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.whatsapp.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
