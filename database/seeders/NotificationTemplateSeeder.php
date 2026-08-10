@@ -12,6 +12,13 @@ class NotificationTemplateSeeder extends Seeder
     {
         $templates = [
             [
+                'code' => 'registration_otp',
+                'name' => 'Kode Verifikasi Pendaftaran (WhatsApp)',
+                'channel' => NotificationChannel::Whatsapp,
+                'subject' => null,
+                'body_template' => 'Halo {{name}}, kode verifikasi WhatsApp Anda: {{otp_code}}. Berlaku {{ttl_minutes}} menit. Jangan bagikan kode ini kepada siapa pun.',
+            ],
+            [
                 'code' => 'booking_confirmed',
                 'name' => 'Pemesanan Dikonfirmasi',
                 'channel' => NotificationChannel::Email,

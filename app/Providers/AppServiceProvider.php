@@ -20,13 +20,17 @@ use App\Domain\Platform\Models\ContentPage;
 use App\Domain\Platform\Models\Faq;
 use App\Domain\Platform\Models\Gallery;
 use App\Domain\Platform\Models\Testimonial;
+use App\Domain\Platform\Services\NotificationDispatcher;
+use App\Domain\Platform\Services\Notifications\LogWhatsAppDriver;
+use App\Domain\Platform\Services\Notifications\NotificationChannelDriver;
+use App\Domain\Platform\Services\Notifications\OpenWaDriver;
 use App\Models\User;
 use App\Policies\ApplicationSettingPolicy;
 use App\Policies\AuditLogPolicy;
+use App\Policies\BookingPolicy;
 use App\Policies\ContentPagePolicy;
 use App\Policies\FaqPolicy;
 use App\Policies\GalleryPolicy;
-use App\Policies\BookingPolicy;
 use App\Policies\InvoicePolicy;
 use App\Policies\LeasePolicy;
 use App\Policies\MaintenanceRequestPolicy;
@@ -46,7 +50,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->when(NotificationDispatcher::class)
+            ->needs(NotificationChannelDriver::class)
+            ->give(fn () => config('services.whatsapp.provider') === 'openwa'
+                ? $this->app->make(OpenWaDriver::class)
+                : $this->app->make(LogWhatsAppDriver::class));
     }
 
     /**

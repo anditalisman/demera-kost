@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domain\Platform\Services\WhatsappOtpService;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -30,7 +31,7 @@ class RegisteredUserController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, WhatsappOtpService $otp): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -54,6 +55,12 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Two independent verification paths — either satisfies
+        // VerifyWhatsappPromptController, so a failed WA delivery doesn't
+        // strand the user (see routes/auth.php's verification.whatsapp.* group).
+        $user->sendEmailVerificationNotification();
+        $otp->generateAndSend($user);
+
+        return redirect(route('verification.whatsapp.notice', absolute: false));
     }
 }
