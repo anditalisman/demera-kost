@@ -150,20 +150,11 @@ function prevImage() {
                             <span class="text-sm font-normal text-charcoal-400">/bulan</span>
                         </p>
 
-                        <dl class="mt-4 space-y-2 text-sm">
-                            <!-- No deposit line: bookings are never charged a deposit
-                                 (see BookingLifecycleService::createHold()), so the
-                                 room's raw deposit_amount field isn't shown here. -->
-                            <div v-for="fee in room.additional_fees ?? []" :key="fee.label" class="flex justify-between">
-                                <dt class="text-charcoal-500">{{ fee.label }}</dt>
-                                <dd class="font-medium text-charcoal-800">{{ formatIdr(fee.amount) }}</dd>
-                            </div>
-                        </dl>
-
-                        <p class="mt-4 text-xs text-charcoal-400">
-                            Deposit dikembalikan penuh saat masa sewa berakhir sesuai kebijakan pembatalan, dikurangi
-                            biaya kerusakan bila ada.
-                        </p>
+                        <!-- No deposit line and no additional-fees breakdown: bookings are
+                             only ever charged the room price (see
+                             BookingLifecycleService::createHold()) — room.deposit_amount
+                             and room.additional_fees aren't part of what's billed, so
+                             they aren't shown here. -->
 
                         <Link
                             v-if="isAvailable"
