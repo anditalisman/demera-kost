@@ -132,6 +132,13 @@ class BookingLifecycleTest extends TestCase
 
         // No deposit is charged, so no Deposit refund-tracking record is created either.
         $this->assertNull($tenant->deposits()->first());
+
+        // The contract only starts counting once the tenant moves in — until an admin
+        // confirms that (LeaseManagementService::confirmMoveIn()), start_date defaults
+        // to the 7-day grace deadline, not the booking's originally requested date.
+        $this->assertNull($lease->moved_in_confirmed_at);
+        $this->assertSame(now()->addDays(7)->toDateString(), $lease->start_date->toDateString());
+        $this->assertSame($lease->start_date->toDateString(), $tenant->joined_at->toDateString());
     }
 
     public function test_guest_is_redirected_to_login_when_trying_to_book(): void

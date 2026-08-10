@@ -119,6 +119,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     Route::get('/leases', [LeaseController::class, 'index'])->name('leases.index');
     Route::get('/leases/{lease}', [LeaseController::class, 'show'])->name('leases.show');
+    Route::post('/leases/{lease}/confirm-move-in', [LeaseController::class, 'confirmMoveIn'])->name('leases.confirm-move-in');
     Route::post('/leases/{lease}/extend', [LeaseController::class, 'extend'])->name('leases.extend');
     Route::post('/leases/{lease}/transfer', [LeaseController::class, 'transferRoom'])->name('leases.transfer');
     Route::post('/leases/{lease}/terminate', [LeaseController::class, 'terminate'])->name('leases.terminate');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Domain\Living\Exceptions\InvalidMoveInDateException;
 use App\Domain\Living\Exceptions\RoomNotAvailableException;
 use App\Domain\Living\Models\Lease;
 use App\Domain\Living\Models\Room;
@@ -38,12 +39,29 @@ class LeaseController extends Controller
     {
         $this->authorize('view', $lease);
 
-        $lease->load(['tenant.user', 'room.property', 'extensions', 'deposits', 'invoices']);
+        $lease->load(['tenant.user', 'room.property', 'extensions', 'deposits', 'invoices', 'booking']);
 
         return Inertia::render('Dashboard/Admin/Living/Leases/Show', [
             'lease' => $lease,
             'availableRooms' => Room::query()->available()->with('property')->orderBy('room_number')->get(),
         ]);
+    }
+
+    public function confirmMoveIn(Request $request, Lease $lease): RedirectResponse
+    {
+        $this->authorize('manage', Lease::class);
+
+        $validated = $request->validate([
+            'move_in_date' => ['nullable', 'date'],
+        ]);
+
+        try {
+            $this->leaseManagementService->confirmMoveIn($lease, $request->user(), $validated['move_in_date'] ?? null);
+        } catch (InvalidMoveInDateException $e) {
+            return back()->withErrors(['move_in_date' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Tanggal menempati dikonfirmasi — kontrak mulai dihitung dari tanggal tersebut.');
     }
 
     public function extend(Request $request, Lease $lease): RedirectResponse

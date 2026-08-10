@@ -167,13 +167,20 @@ class BookingLifecycleService
                 'verified_at' => now(),
             ]);
 
+            // The contract only starts counting once the tenant actually moves in — an admin
+            // confirms that date via LeaseManagementService::confirmMoveIn(). Absent that
+            // confirmation, this 7-day grace deadline is the fallback: a tenant who never
+            // shows up still starts being billed from here rather than holding the room
+            // (and their booked start_date) indefinitely.
+            $provisionalStartDate = now()->addDays(7)->startOfDay();
+
             $tenant = Tenant::query()->firstOrCreate(
                 ['user_id' => $locked->user_id],
                 [
                     'room_id' => $locked->room_id,
                     'booking_id' => $locked->id,
                     'status' => TenantStatus::Active,
-                    'joined_at' => $locked->start_date,
+                    'joined_at' => $provisionalStartDate,
                 ],
             );
 
@@ -182,7 +189,7 @@ class BookingLifecycleService
                     'room_id' => $locked->room_id,
                     'booking_id' => $locked->id,
                     'status' => TenantStatus::Active,
-                    'joined_at' => $locked->start_date,
+                    'joined_at' => $provisionalStartDate,
                     'moved_out_at' => null,
                 ]);
             }
@@ -192,12 +199,12 @@ class BookingLifecycleService
                 'tenant_id' => $tenant->id,
                 'room_id' => $locked->room_id,
                 'booking_id' => $locked->id,
-                'start_date' => $locked->start_date,
-                'end_date' => $locked->start_date->copy()->addMonthsNoOverflow($locked->duration_months),
+                'start_date' => $provisionalStartDate,
+                'end_date' => $provisionalStartDate->copy()->addMonthsNoOverflow($locked->duration_months),
                 'duration_months' => $locked->duration_months,
                 'monthly_price' => $locked->monthly_price,
                 'deposit_amount' => $locked->deposit_amount,
-                'billing_cycle_day' => min((int) $locked->start_date->format('d'), 28),
+                'billing_cycle_day' => min($provisionalStartDate->day, 28),
                 'status' => LeaseStatus::Active,
                 'approved_by' => $verifiedBy?->id,
                 'approved_at' => now(),

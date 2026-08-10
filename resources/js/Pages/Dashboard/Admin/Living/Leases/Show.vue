@@ -7,6 +7,7 @@ import InputError from '@/Components/InputError.vue';
 import { formatIdr } from '@/lib/roomStatus';
 import { formatDate } from '@/lib/date';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface ExtensionRow {
     id: number;
@@ -26,6 +27,7 @@ interface LeaseDetail {
     lease_number: string;
     status: string;
     start_date: string;
+    moved_in_confirmed_at: string | null;
     end_date: string;
     duration_months: number;
     monthly_price: string;
@@ -35,6 +37,7 @@ interface LeaseDetail {
     room: { name: string | null; room_number: string; property: { name: string } };
     extensions: ExtensionRow[];
     deposits: DepositRow[];
+    booking: { confirmed_at: string | null } | null;
 }
 
 const props = defineProps<{
@@ -47,6 +50,19 @@ const STATUS_LABEL: Record<string, string> = {
     completed: 'Selesai', cancelled: 'Dibatalkan', extended: 'Diperpanjang',
 };
 const isActive = props.lease.status === 'active';
+
+const moveInDeadline = computed(() => {
+    if (!props.lease.booking?.confirmed_at) return null;
+    const deadline = new Date(props.lease.booking.confirmed_at);
+    deadline.setDate(deadline.getDate() + 7);
+    return deadline;
+});
+const moveInPending = computed(() => isActive && props.lease.moved_in_confirmed_at === null);
+
+const moveInForm = useForm({ move_in_date: new Date().toISOString().slice(0, 10) });
+function submitMoveIn() {
+    moveInForm.post(route('admin.leases.confirm-move-in', props.lease.id), { preserveScroll: true });
+}
 
 const extendForm = useForm({ additional_months: 1, new_monthly_price: '' as string | number, notes: '' });
 function submitExtend() {
@@ -82,7 +98,31 @@ function submitTerminate() {
                 <div><dt class="text-charcoal-400">Harga/Bulan</dt><dd>{{ formatIdr(lease.monthly_price) }}</dd></div>
                 <div><dt class="text-charcoal-400">Deposit</dt><dd>{{ formatIdr(lease.deposit_amount) }}</dd></div>
                 <div><dt class="text-charcoal-400">Status</dt><dd>{{ STATUS_LABEL[lease.status] }}</dd></div>
+                <div>
+                    <dt class="text-charcoal-400">Menempati</dt>
+                    <dd v-if="lease.moved_in_confirmed_at">Dikonfirmasi menempati {{ formatDate(lease.start_date) }}</dd>
+                    <dd v-else-if="moveInDeadline" class="text-amber-700">
+                        Belum dikonfirmasi — mulai dihitung otomatis {{ formatDate(lease.start_date) }} kalau tidak dikonfirmasi sebelum {{ moveInDeadline.toLocaleDateString('id-ID') }}
+                    </dd>
+                    <dd v-else>—</dd>
+                </div>
             </dl>
+        </div>
+
+        <div v-if="moveInPending" class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-soft">
+            <h2 class="font-display text-sm font-semibold uppercase tracking-wide text-amber-800">Konfirmasi Menempati</h2>
+            <p class="mt-1 text-sm text-amber-700">
+                Kontrak masih memakai tanggal mulai sementara (batas 7 hari sejak pembayaran). Tandai tanggal
+                penyewa benar-benar menempati kamar untuk memperbaiki tanggal mulai kontrak.
+            </p>
+            <form class="mt-3 flex flex-wrap items-end gap-3" @submit.prevent="submitMoveIn">
+                <div>
+                    <InputLabel value="Tanggal Menempati" />
+                    <TextInput v-model="moveInForm.move_in_date" type="date" class="mt-1 block" required />
+                    <InputError :message="moveInForm.errors.move_in_date" />
+                </div>
+                <PrimaryButton :disabled="moveInForm.processing">Konfirmasi Menempati</PrimaryButton>
+            </form>
         </div>
 
         <template v-if="isActive">
