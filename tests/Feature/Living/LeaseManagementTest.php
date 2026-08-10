@@ -2,6 +2,10 @@
 
 namespace Tests\Feature\Living;
 
+use App\Domain\Living\Exceptions\InvalidMoveInDateException;
+use App\Domain\Living\Exceptions\RoomNotAvailableException;
+use App\Domain\Living\Models\Booking;
+use App\Domain\Living\Models\Deposit;
 use App\Domain\Living\Models\Lease;
 use App\Domain\Living\Models\Room;
 use App\Domain\Living\Models\Tenant;
@@ -11,6 +15,7 @@ use App\Enums\LeaseStatus;
 use App\Enums\RoomStatus;
 use App\Enums\TenantStatus;
 use App\Models\User;
+use Carbon\Carbon;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -84,7 +89,7 @@ class LeaseManagementTest extends TestCase
         $newRoom = Room::factory()->create(['status' => RoomStatus::Maintenance]);
         $lease = $this->activeLeaseFor($oldRoom);
 
-        $this->expectException(\App\Domain\Living\Exceptions\RoomNotAvailableException::class);
+        $this->expectException(RoomNotAvailableException::class);
         app(LeaseManagementService::class)->transferRoom($lease, $newRoom, $admin);
     }
 
@@ -93,7 +98,7 @@ class LeaseManagementTest extends TestCase
         $admin = $this->admin();
         $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
         $lease = $this->activeLeaseFor($room);
-        \App\Domain\Living\Models\Deposit::factory()->create(['tenant_id' => $lease->tenant_id, 'lease_id' => $lease->id, 'amount' => 500000]);
+        Deposit::factory()->create(['tenant_id' => $lease->tenant_id, 'lease_id' => $lease->id, 'amount' => 500000]);
 
         $terminated = app(LeaseManagementService::class)->terminate($lease, $admin, 'Selesai kontrak', '500000');
 
@@ -112,7 +117,7 @@ class LeaseManagementTest extends TestCase
         $admin = $this->admin();
         $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
         $lease = $this->activeLeaseFor($room);
-        \App\Domain\Living\Models\Deposit::factory()->create(['tenant_id' => $lease->tenant_id, 'lease_id' => $lease->id, 'amount' => 500000]);
+        Deposit::factory()->create(['tenant_id' => $lease->tenant_id, 'lease_id' => $lease->id, 'amount' => 500000]);
 
         $terminated = app(LeaseManagementService::class)->terminate($lease, $admin, 'Pelanggaran peraturan', '200000', 'Potongan kerusakan dinding');
 
@@ -122,6 +127,108 @@ class LeaseManagementTest extends TestCase
         $deposit = $lease->deposits()->latest('id')->first();
         $this->assertSame(DepositStatus::PartiallyReturned, $deposit->status);
         $this->assertSame('Potongan kerusakan dinding', $deposit->deduction_notes);
+    }
+
+    /**
+     * A lease still awaiting move-in confirmation: booking.confirmed_at pins the
+     * "payment date" the 7-day grace window is measured from, and start_date sits
+     * at that default deadline (mirroring what BookingLifecycleService::confirm()
+     * actually produces) until confirmMoveIn() pulls it earlier.
+     */
+    private function pendingMoveInLeaseFor(Room $room, Carbon $paidAt): Lease
+    {
+        $booking = Booking::factory()->create(['room_id' => $room->id, 'confirmed_at' => $paidAt]);
+        $tenant = Tenant::factory()->create(['status' => TenantStatus::Active, 'room_id' => $room->id, 'booking_id' => $booking->id]);
+        $deadline = $paidAt->copy()->addDays(7)->startOfDay();
+
+        return Lease::factory()->create([
+            'tenant_id' => $tenant->id,
+            'room_id' => $room->id,
+            'booking_id' => $booking->id,
+            'status' => LeaseStatus::Active,
+            'start_date' => $deadline->toDateString(),
+            'end_date' => $deadline->copy()->addMonths(6)->toDateString(),
+            'duration_months' => 6,
+            'moved_in_confirmed_at' => null,
+        ]);
+    }
+
+    public function test_confirming_move_in_on_payment_day_starts_the_lease_that_day(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(3);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+
+        $updated = app(LeaseManagementService::class)->confirmMoveIn($lease, $admin, $paidAt->toDateString());
+
+        $this->assertSame($paidAt->toDateString(), $updated->start_date->toDateString());
+        $this->assertSame($paidAt->copy()->addMonthsNoOverflow(6)->toDateString(), $updated->end_date->toDateString());
+        $this->assertNotNull($updated->moved_in_confirmed_at);
+        $this->assertSame($paidAt->toDateString(), $updated->tenant->fresh()->joined_at->toDateString());
+    }
+
+    public function test_confirming_move_in_within_the_grace_window_updates_start_date(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(3);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+        $actualMoveIn = $paidAt->copy()->addDays(2);
+
+        $updated = app(LeaseManagementService::class)->confirmMoveIn($lease, $admin, $actualMoveIn->toDateString());
+
+        $this->assertSame($actualMoveIn->toDateString(), $updated->start_date->toDateString());
+    }
+
+    public function test_confirming_move_in_before_payment_date_is_rejected(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(3);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+
+        $this->expectException(InvalidMoveInDateException::class);
+        app(LeaseManagementService::class)->confirmMoveIn($lease, $admin, $paidAt->copy()->subDay()->toDateString());
+    }
+
+    public function test_confirming_move_in_past_the_seven_day_deadline_is_rejected(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(10);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+
+        $this->expectException(InvalidMoveInDateException::class);
+        app(LeaseManagementService::class)->confirmMoveIn($lease, $admin, now()->toDateString());
+    }
+
+    public function test_confirming_move_in_twice_is_rejected(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(3);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+
+        app(LeaseManagementService::class)->confirmMoveIn($lease->fresh(), $admin, $paidAt->toDateString());
+
+        $this->expectException(InvalidMoveInDateException::class);
+        app(LeaseManagementService::class)->confirmMoveIn($lease->fresh(), $admin, $paidAt->toDateString());
+    }
+
+    public function test_admin_can_confirm_move_in_via_http(): void
+    {
+        $admin = $this->admin();
+        $room = Room::factory()->create(['status' => RoomStatus::Occupied]);
+        $paidAt = now()->subDays(3);
+        $lease = $this->pendingMoveInLeaseFor($room, $paidAt);
+
+        $this->actingAs($admin)->post("/admin/leases/{$lease->id}/confirm-move-in", [
+            'move_in_date' => $paidAt->toDateString(),
+        ])->assertRedirect();
+
+        $this->assertSame($paidAt->toDateString(), $lease->fresh()->start_date->toDateString());
+        $this->assertNotNull($lease->fresh()->moved_in_confirmed_at);
     }
 
     public function test_admin_can_extend_lease_via_http(): void

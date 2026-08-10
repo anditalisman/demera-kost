@@ -2,6 +2,7 @@
 
 namespace App\Domain\Living\Services;
 
+use App\Domain\Living\Exceptions\InvalidMoveInDateException;
 use App\Domain\Living\Exceptions\RoomNotAvailableException;
 use App\Domain\Living\Models\Deposit;
 use App\Domain\Living\Models\Lease;
@@ -12,16 +13,59 @@ use App\Enums\LeaseStatus;
 use App\Enums\RoomStatus;
 use App\Enums\TenantStatus;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Post-move-in lease operations an admin performs outside the automatic
- * booking→payment flow: extending a contract, transferring a tenant to a
- * different room, and ending a lease with deposit settlement.
+ * Lease operations an admin performs outside the automatic booking→payment
+ * flow: confirming the tenant's actual move-in date (see confirmMoveIn()),
+ * extending a contract, transferring a tenant to a different room, and
+ * ending a lease with deposit settlement.
  */
 class LeaseManagementService
 {
+    /**
+     * A tenant's contract only starts counting once they actually move in — up to 7
+     * days after payment is confirmed (BookingLifecycleService::confirm() already
+     * defaults start_date to that deadline). Calling this before the tenant shows up
+     * pulls the lease's billing start back to the real, earlier move-in date; the
+     * default stands untouched if this is never called.
+     */
+    public function confirmMoveIn(Lease $lease, User $admin, ?string $moveInDate = null): Lease
+    {
+        return DB::transaction(function () use ($lease, $moveInDate) {
+            $locked = Lease::query()->lockForUpdate()->findOrFail($lease->id);
+
+            if ($locked->moved_in_confirmed_at !== null) {
+                throw new InvalidMoveInDateException('Tanggal menempati sudah pernah dikonfirmasi untuk kontrak ini.');
+            }
+
+            $paidAt = ($locked->booking?->confirmed_at ?? $locked->created_at)->copy()->startOfDay();
+            $deadline = $paidAt->copy()->addDays(7);
+            $date = $moveInDate ? Carbon::parse($moveInDate)->startOfDay() : now()->startOfDay();
+
+            if ($date->lt($paidAt)) {
+                throw new InvalidMoveInDateException('Tanggal menempati tidak boleh sebelum tanggal pembayaran dikonfirmasi.');
+            }
+
+            if ($date->gt($deadline)) {
+                throw new InvalidMoveInDateException('Tanggal menempati sudah melewati batas 7 hari sejak pembayaran — kontrak sudah otomatis dimulai per tanggal batas tersebut.');
+            }
+
+            $locked->update([
+                'start_date' => $date,
+                'end_date' => $date->copy()->addMonthsNoOverflow($locked->duration_months),
+                'billing_cycle_day' => min($date->day, 28),
+                'moved_in_confirmed_at' => now(),
+            ]);
+
+            $locked->tenant?->update(['joined_at' => $date]);
+
+            return $locked->fresh();
+        });
+    }
+
     public function extend(Lease $lease, int $additionalMonths, ?string $newMonthlyPrice, User $admin, ?string $notes = null): LeaseExtension
     {
         return DB::transaction(function () use ($lease, $additionalMonths, $newMonthlyPrice, $admin, $notes) {
