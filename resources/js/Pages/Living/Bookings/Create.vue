@@ -46,7 +46,9 @@ const form = useForm({
     ],
 });
 
-const totalDue = computed(() => Number(props.room.monthly_price) + Number(props.room.deposit_amount) + props.adminFee);
+// No deposit is charged on new bookings (BookingLifecycleService::createHold()
+// hardcodes it to 0) — mirror that here so the preview matches what's actually billed.
+const totalDue = computed(() => Number(props.room.monthly_price) + props.adminFee);
 
 function addGuest() {
     form.guests.push({ full_name: '', identity_number: '', phone: '', email: '', relationship: '' });
@@ -170,10 +172,8 @@ function submit() {
                                 <dt class="text-charcoal-500">Sewa Bulan Pertama</dt>
                                 <dd class="font-medium text-charcoal-800">{{ formatIdr(room.monthly_price) }}</dd>
                             </div>
-                            <div class="flex justify-between">
-                                <dt class="text-charcoal-500">Deposit</dt>
-                                <dd class="font-medium text-charcoal-800">{{ formatIdr(room.deposit_amount) }}</dd>
-                            </div>
+                            <!-- No deposit line: bookings are never charged a deposit
+                                 (see BookingLifecycleService::createHold()). -->
                             <div v-if="adminFee > 0" class="flex justify-between">
                                 <dt class="text-charcoal-500">Biaya Admin</dt>
                                 <dd class="font-medium text-charcoal-800">{{ formatIdr(adminFee) }}</dd>

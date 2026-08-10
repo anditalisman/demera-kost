@@ -48,21 +48,25 @@ class BookingLifecycleTest extends TestCase
         Storage::fake('private_documents');
 
         $user = $this->customer();
+        // deposit_amount is intentionally nonzero here to prove createHold() ignores it —
+        // no deposit is charged on new bookings (see BookingLifecycleService::createHold()).
         $room = Room::factory()->create(['status' => RoomStatus::Available, 'monthly_price' => 1500000, 'deposit_amount' => 500000]);
 
         $booking = app(BookingLifecycleService::class)->createHold($user, $room, $this->bookingData());
 
         $this->assertSame(BookingStatus::AwaitingPayment, $booking->status);
         $this->assertNotEmpty($booking->booking_code);
-        $this->assertSame('2000000.00', $booking->total_amount);
+        $this->assertSame('1500000.00', $booking->total_amount);
+        $this->assertSame('0.00', $booking->deposit_amount);
         $this->assertSame(RoomStatus::Held, $room->fresh()->status);
         $this->assertCount(1, $booking->guests);
         $this->assertTrue($booking->guests->first()->is_primary);
 
         $invoice = $booking->invoices->first();
         $this->assertSame(InvoiceStatus::Unpaid, $invoice->status);
-        $this->assertSame('2000000.00', $invoice->total_amount);
-        $this->assertCount(2, $invoice->items);
+        $this->assertSame('1500000.00', $invoice->total_amount);
+        $this->assertCount(1, $invoice->items);
+        $this->assertSame('rent', $invoice->items->first()->item_type);
     }
 
     public function test_second_hold_attempt_on_the_same_room_is_rejected(): void
@@ -107,7 +111,7 @@ class BookingLifecycleTest extends TestCase
         $this->assertSame(BookingStatus::Expired, $booking->fresh()->status);
     }
 
-    public function test_confirming_a_booking_creates_tenant_lease_and_deposit(): void
+    public function test_confirming_a_booking_creates_tenant_and_lease_with_no_deposit(): void
     {
         $user = $this->customer();
         $room = Room::factory()->create(['status' => RoomStatus::Available, 'monthly_price' => 1200000, 'deposit_amount' => 400000]);
@@ -118,6 +122,7 @@ class BookingLifecycleTest extends TestCase
 
         $this->assertSame(LeaseStatus::Active, $lease->status);
         $this->assertSame('1200000.00', $lease->monthly_price);
+        $this->assertSame('0.00', $lease->deposit_amount);
         $this->assertSame(RoomStatus::Occupied, $room->fresh()->status);
         $this->assertSame(BookingStatus::ConvertedToLease, $booking->fresh()->status);
 
@@ -125,8 +130,8 @@ class BookingLifecycleTest extends TestCase
         $this->assertSame(TenantStatus::Active, $tenant->status);
         $this->assertSame($user->id, $tenant->user_id);
 
-        $deposit = $tenant->deposits()->first();
-        $this->assertSame('400000.00', $deposit->amount);
+        // No deposit is charged, so no Deposit refund-tracking record is created either.
+        $this->assertNull($tenant->deposits()->first());
     }
 
     public function test_guest_is_redirected_to_login_when_trying_to_book(): void
