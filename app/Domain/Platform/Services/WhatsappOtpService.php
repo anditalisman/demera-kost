@@ -41,6 +41,13 @@ class WhatsappOtpService
 
         $user->forceFill(['whatsapp_verified_at' => now()])->save();
 
+        // WhatsApp alone is enough to reach the dashboard (EnsureAccountIsVerified) —
+        // this is a nudge, not a gate, so a stale/never-clicked email link doesn't
+        // silently go unnoticed.
+        if (! $user->hasVerifiedEmail()) {
+            $this->dispatcher->dispatch($user, 'email_verification_reminder', ['email' => $user->email]);
+        }
+
         return true;
     }
 

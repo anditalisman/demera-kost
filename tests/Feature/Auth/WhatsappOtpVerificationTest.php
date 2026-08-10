@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Domain\Platform\Models\Notification;
 use App\Domain\Platform\Services\WhatsappOtpService;
 use App\Models\User;
 use Database\Seeders\NotificationTemplateSeeder;
@@ -95,5 +96,45 @@ class WhatsappOtpVerificationTest extends TestCase
             ->assertSessionHas('status', 'whatsapp-otp-sent');
 
         $this->assertNotNull(Cache::get("whatsapp_otp:{$user->id}"));
+    }
+
+    /**
+     * Regression test: the customer dashboard route carries its own
+     * "account.verified" middleware (routes/modules/admin.php's `customer.`
+     * group). A user verified only via WhatsApp must reach it directly, not
+     * get bounced back to an email-verification prompt.
+     */
+    public function test_whatsapp_only_verified_user_reaches_the_dashboard_without_an_email_bounce(): void
+    {
+        $user = $this->user();
+        app(WhatsappOtpService::class)->generateAndSend($user);
+        $code = Cache::get("whatsapp_otp:{$user->id}");
+        $this->actingAs($user)->post('/verify-whatsapp', ['code' => $code]);
+
+        $this->actingAs($user)->get('/dashboard')
+            ->assertRedirect(route('customer.dashboard', absolute: false));
+    }
+
+    public function test_verifying_whatsapp_creates_an_in_app_email_reminder_when_email_is_unverified(): void
+    {
+        $user = $this->user();
+        app(WhatsappOtpService::class)->generateAndSend($user);
+        $code = Cache::get("whatsapp_otp:{$user->id}");
+
+        $this->actingAs($user)->post('/verify-whatsapp', ['code' => $code]);
+
+        $this->assertSame(1, Notification::where('user_id', $user->id)->where('type', 'email_verification_reminder')->count());
+    }
+
+    public function test_verifying_whatsapp_skips_the_email_reminder_when_email_is_already_verified(): void
+    {
+        $user = $this->user();
+        $user->forceFill(['email_verified_at' => now()])->save();
+        app(WhatsappOtpService::class)->generateAndSend($user);
+        $code = Cache::get("whatsapp_otp:{$user->id}");
+
+        $this->actingAs($user)->post('/verify-whatsapp', ['code' => $code]);
+
+        $this->assertSame(0, Notification::where('user_id', $user->id)->where('type', 'email_verification_reminder')->count());
     }
 }
