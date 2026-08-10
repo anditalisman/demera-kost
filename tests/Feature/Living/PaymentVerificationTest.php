@@ -151,7 +151,7 @@ class PaymentVerificationTest extends TestCase
         $this->actingAs($customer)->post("/invoices/{$invoice->id}/payments", [
             'method' => 'manual_transfer',
             'proof' => UploadedFile::fake()->create('bukti.jpg', 200, 'image/jpeg'),
-        ])->assertRedirect();
+        ])->assertRedirect(route('dashboard', absolute: false));
 
         $payment = $invoice->payments()->firstOrFail();
 
