@@ -24,7 +24,7 @@ Route::get('/dashboard', function () {
     return auth()->user()->hasRole('admin')
         ? redirect()->route('admin.dashboard')
         : redirect()->route('customer.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'account.verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

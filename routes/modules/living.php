@@ -24,10 +24,10 @@ Route::prefix('living')->name('living.')->group(function () {
     Route::get('/faq', [LivingController::class, 'faq'])->name('faq');
     Route::get('/contact', [LivingController::class, 'contact'])->name('contact');
 
-    Route::middleware(['auth', 'verified'])->get('/rooms/{slug}/book', [BookingController::class, 'create'])->name('rooms.book');
+    Route::middleware(['auth', 'account.verified'])->get('/rooms/{slug}/book', [BookingController::class, 'create'])->name('rooms.book');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'account.verified'])->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{code}', [BookingController::class, 'show'])->name('bookings.show');
 
