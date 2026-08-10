@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        // Selects the NotificationChannelDriver bound for the "whatsapp" channel
+        // in AppServiceProvider — "log" (default) or "openwa".
+        'provider' => env('WHATSAPP_PROVIDER', 'log'),
+    ],
+
+    'openwa' => [
+        'base_url' => env('OPENWA_BASE_URL'),
+        'api_key' => env('OPENWA_API_KEY'),
+        'session_id' => env('OPENWA_SESSION_ID'),
+        'timeout' => env('OPENWA_TIMEOUT', 15),
+    ],
+
 ];
