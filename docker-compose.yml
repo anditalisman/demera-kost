@@ -157,7 +157,8 @@ services:
     environment:
       - MAIL_HOSTNAME=${MAIL_HOSTNAME:-smtp.demera.my.id}
     volumes:
-      - /etc/dokploy/traefik/dynamic/acme.json:/acme.json:ro
+      # acme.json of the host Traefik (Capsul); override with TRAEFIK_ACME_FILE on other hosts.
+      - ${TRAEFIK_ACME_FILE:-/opt/capsul/data/traefik/acme.json}:/acme.json:ro
       - mail_certs:/output
     # traefik-certs-dumper's own output filenames (certificate.crt /
     # privatekey.key) don't match what docker-mailserver looks for
